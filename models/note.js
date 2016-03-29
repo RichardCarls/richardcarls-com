@@ -7,7 +7,6 @@ var path = require('path'),
 
 
 var noteSchema = new mongoose.Schema({
-    name: { type: String },
     content: { type: String, },
     published: { type: Date, },
 }, {

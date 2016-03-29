@@ -1,0 +1,23 @@
+{% extends '../page.nunj.html' %}
+
+{% block title %}Richard Carls | Client{% endblock %}
+
+{% block content %}
+<h1>Client</h1>
+
+<form id="micropub"
+      action="{{ client.endpoint }}"
+      method="post">
+  <fieldset>
+    <legend>Simple Micropub Form</legend>
+    
+    <label for="content">Content</label>
+    <textarea id="content" name="content"
+	      placeholder="Write something&hellip;"></textarea>
+    
+    <input type="submit" value="Post" />
+    
+    <input type="hidden" id="h" name="h" value="entry" />
+  </fieldset>
+</form>
+{% endblock %}

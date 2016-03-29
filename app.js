@@ -68,5 +68,6 @@ viewsEnv.express(app);
 
 // Routing
 app
+    .use('/client', require(path.resolve(__dirname, './routes/client')))
     .use('/', require(path.resolve(__dirname, './routes/home')))
     .use(express.static('./public_http'));
