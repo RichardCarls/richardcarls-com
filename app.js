@@ -29,6 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 } else {
     config = require(path.resolve(__dirname, './config/production'));
 }
+app.locals = config;
 
 // Middleware
 app

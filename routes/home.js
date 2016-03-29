@@ -9,7 +9,23 @@ var app = require(path.relative(__dirname, 'app.js')),
 
 
 router.get('/', function(req, res) {
-    return res.render('home/home.nunj.html', {});
+    return res.render('home/home.nunj.html', app.locals);
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
