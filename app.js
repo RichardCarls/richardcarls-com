@@ -11,7 +11,7 @@ var path = require('path'),
     mongoose = require('mongoose'),
     nunjucks = require('nunjucks');
 
-var logger = require(path.resolve(__dirname, 'lib/logger.js'));
+var logger = require(path.resolve(__dirname, 'lib/logger'));
 
 
 /**
@@ -21,6 +21,14 @@ var logger = require(path.resolve(__dirname, 'lib/logger.js'));
 logger.info('Initializing app');
 
 var app = module.exports = express();
+
+// Config
+var config;
+if (process.env.NODE_ENV === 'development') {
+    config = require(path.resolve(__dirname, './config/development'));
+} else {
+    config = require(path.resolve(__dirname, './config/production'));
+}
 
 // Middleware
 app
@@ -32,10 +40,8 @@ app
     .use(cookieParser());
 
 // Database
-mongoose.connect('mongodb://mongo:27017/richardcarls-com', {
-    user: process.env.MONGO_USER,
-    pass: process.env.MONGO_PASS,
-});
+logger.info('Attempting to connect to MongoDB at ' + config.mongoose.uri);
+mongoose.connect(config.mongoose.uri, config.mongoose.connectOptions);
 var db = mongoose.connection;
 db.on('connected', function() {
     logger.info('Established connection to MongoDB');
@@ -61,6 +67,5 @@ viewsEnv.express(app);
 
 // Routing
 app
-    //.use('/micropub', require(path.resolve(__dirname, './routes/micropub')))
     .use('/', require(path.resolve(__dirname, './routes/home')))
     .use(express.static('./public_http'));
