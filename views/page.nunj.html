@@ -1,14 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="240" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     
     <title>{% block title %}Richard Carls{% endblock %}</title>
-</head>
-<body>
+    
+    <!-- RelMeAuth Profiles -->
+    {% for profile in locals.me.profiles %}
+    <link rel="me" href="{{ profile.url }}" />
+    {% endfor %}
+
+    <!-- Endpoints -->
+    <link rel="authorization_endpoint" href="{{ locals.site.authorizationEndpoint }}" />
+    <link rel="token_endpoint" href="{{ locals.site.tokenEndpoint }}" />
+    <!--<link rel="micropub" href="{{ site.micropubEndpoint }}" />-->
+    <!--<link rel="webmention" href="{{ site.webmentionEndpoint }}" />-->
+
+    <link rel="openid.delegate" href="{{ locals.site.url }}" />
+    <link rel="openid.server" href="https://indieauth.com/openid" />
+  </head>
+  <body>
+    <div>
+      {% if user %}
+      <span>You are signed in as <strong>{{ user.me }}</strong></span>
+      <span>with scope {{ user.scope }}</span>.<br />
+      <a href="{{ locals.site.url }}/auth/logout">sign out</a>
+      {% else %}
+      <span>You are not currently signed in.</span><br />
+      <a href="{{ locals.site.url }}/auth/login">sign in</a>
+      {% endif %}
+    </div>
     <main>
-        {% block content %}
-        {% endblock %}
+      {% block content %}
+      {% endblock %}
     </main>
-</body>
+  </body>
 </html>
