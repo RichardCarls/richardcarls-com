@@ -117,6 +117,7 @@ db.on('connected', function() {
 
   // Routing
   app
+    .use('/micropub', require(path.resolve(__dirname, './routes/micropub')))
     .use('/client', require(path.resolve(__dirname, './routes/client')))
     .use('/', require(path.resolve(__dirname, './routes/home')));
 });
