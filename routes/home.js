@@ -1,5 +1,5 @@
 var path = require('path');
-var router = require('express').Router();
+var router = require('express').Router(); // eslint-disable-line new-cap
 
 var app = require(path.relative(__dirname, 'app.js'));
 var logger = require(path.relative(__dirname, 'lib/logger.js'));

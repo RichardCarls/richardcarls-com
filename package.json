@@ -11,7 +11,7 @@
   "author": "Richard Carls (richard.j.carls@gmail.com)",
   "license": "ISC",
   "dependencies": {
-    "@rcarls/passport-indieauth": "file:///projects/passport-indieauth",
+    "@rcarls/passport-indieauth": "^1.1.0",
     "body-parser": "^1.15.1",
     "cookie-session": "^2.0.0-alpha.1",
     "cors": "^2.7.1",

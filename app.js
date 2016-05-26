@@ -14,11 +14,6 @@ var nunjucks = require('nunjucks');
 
 var logger = require(path.resolve(__dirname, 'lib/logger'));
 
-
-/**
- * @module app
- */
-
 logger.info('Initializing app');
 
 var app = module.exports = express();
@@ -37,7 +32,7 @@ app.use(express.static('./public_http'));
 
 // Middleware
 app
-  .use(morgan('dev', { "stream": logger.stream }))
+  .use(morgan('dev', { stream: logger.stream, }))
   .use(helmet())
   .use(cors())
   .use(bodyParser.json())
@@ -67,25 +62,38 @@ db.on('connected', function() {
     var user = {
       me: domain,
       scope: scope,
-      profile: profile,
     };
-    
-    logger.debug('profile', { profile: profile, });
-    
+
+    // TODO: Save as Person, only save domain+scope in session
+
+    if (profile.name.formatted) {
+      user.name = profile.name.formatted;
+    }
+
+    if (profile.photos && profile.photos.length) {
+      user.photo = profile.photos[0].value;
+    }
+
+    if (profile._json.rels && profile._json.rels['micropub']) {
+      user.micropub = profile._json.rels['micropub'];
+    }
+
     return done(null, user, {});
   }));
   passport.use(new AnonymousStrategy({}));
-  
+
   passport.serializeUser(function(user, done) {
+    // TODO: Save as Person to db
     return done(null, user);
   });
 
   passport.deserializeUser(function(user, done) {
+    // TODO Load Person from domain key
     return done(null, user);
   });
 
   logger.info('Database and sessions initialized');
-  
+
   // Views
   var viewsEnv = new nunjucks.Environment(
     new nunjucks.FileSystemLoader('views', { noCache: true, }),
@@ -105,8 +113,8 @@ db.on('connected', function() {
 
   // Auth
   app.use('/auth', require(path.resolve(__dirname, './routes/auth')));
-  app.use(passport.authenticate(['indieauth', 'anonymous']));
-  
+  app.use(passport.authenticate(['indieauth', 'anonymous',]));
+
   // Routing
   app
     .use('/client', require(path.resolve(__dirname, './routes/client')))
@@ -117,9 +125,9 @@ db.on('error', function(err) {
   logger.error(err);
 });
 
-process.on('SIGINT', function() {  
-  db.close(function () { 
-    logger.info('Connection to MongoDB closed.'); 
-    process.exit(0); 
-  }); 
+process.on('SIGINT', function() {
+  db.close(function () {
+    logger.info('Connection to MongoDB closed.');
+    process.exit(0);
+  });
 });

@@ -12,14 +12,26 @@
   <fieldset>
     <legend>Simple Micropub Form</legend>
 
-    <p>{{ user.me }}</p>
-    <label for="content">Content</label>
-    <textarea id="content" name="content"
-	      placeholder="Write something&hellip;"></textarea>
+    <h3>Posting to <strong>{{ user.micropub }}</strong></h3>
+
+    <div>
+      <label for="content">Content</label>
+      <textarea id="content" name="content"
+	        placeholder="Write something&hellip;"></textarea>
+    </div>
+
+    <div>
+      <label for="category">Category</label>
+      <input type="text" id="category"
+             name="category"
+             placeholder="Cat1, Cat2, etc." />
+    </div>
     
     <input type="submit" value="Post" />
     
     <input type="hidden" id="h" name="h" value="entry" />
+    <input type="hidden" name="_csrf" value="{{ _csrf }}" />
+
   </fieldset>
 </form>
 {% else %}
