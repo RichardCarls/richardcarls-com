@@ -5,6 +5,7 @@ module.exports = {
   redirectUri: siteUrl + '/auth',
   authorizationEndpoint: 'https://indieauth.com/auth',
   tokenEndpoint: 'https://tokens.indieauth.com/token',
+  micropubEndpoint: siteUrl + '/micropub',
   pages: [
     { name: 'Home', path: '/home', },
     { name: 'Client', path: '/client', },
