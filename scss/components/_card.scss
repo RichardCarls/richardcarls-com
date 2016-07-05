@@ -1,0 +1,31 @@
+$card-border-radius: 					em(4) !default;
+$card-padding:                          em(16) !default;
+$card-padding--large:                   em(24) !default;
+
+$card-font-color:                       #000000 !default;
+$card-background-color:                 #ffffff !default;
+
+%card,
+.card {
+    position: relative;
+    color: $card-font-color;
+	background-color: $card-background-color;
+    text-align: left;
+    border-radius: $card-border-radius;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.23), 0 3px 12px rgba(0,0,0,0.16);
+    
+    .section { @extend %card__section; }
+}
+
+%card__section {
+    position: relative;
+    padding: $card-padding;
+    
+    &:first-child { padding-top: $card-padding--large; }
+    &:last-child { padding-bottom: $card-padding--large; }
+    
+    &.secondary { @extend %card__section--secondary; }
+}
+
+%card__section--secondary { background-color: rgba(0, 0, 0, 0.23); }

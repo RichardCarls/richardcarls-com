@@ -1,0 +1,36 @@
+$fixedfluid-breakpoint:                     desktop !default;
+
+$fixedfluid-sidebar-width:                  18rem !default;
+$fixedfluid-sidebar-text-color:             #000000 !default;
+$fixedfluid-sidebar-background-color:       #ffffff !default;
+$fixedfluid-sidebar-z-index:                1 !default;
+
+
+%fixedfluid__sidebar,
+.fixedfluid__sidebar {
+  margin: 0;
+  padding: 0;
+  color: $fixedfluid-sidebar-text-color;
+  background-color: $fixedfluid-sidebar-background-color;
+  z-index: $fixedfluid-sidebar-z-index;
+  
+  @include media-query($fixedfluid-breakpoint) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: $fixedfluid-sidebar-width;
+  }
+}
+
+%fixedfluid__container,
+.fixedfluid__container {
+    @extend %container;
+    
+    margin: 0;
+    padding: 0;
+    
+    @include media-query($fixedfluid-breakpoint) {
+        margin-left: $fixedfluid-sidebar-width;
+    }
+}

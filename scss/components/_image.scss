@@ -1,0 +1,37 @@
+%image,
+.image {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    overflow: hidden;
+    vertical-align: middle;
+    
+    img { @extend %image__content; }
+    
+    /* Shapes */
+    &--circle { @extend %image--circle; }
+    &--hexagon { @extend %image--hexagon; }
+    
+    /* Formats */
+    &--inline { @extend %image--inline; }
+    &--fluid { @extend %image--fluid; }
+
+}
+
+%image__content {
+    max-width: 100%;
+    height: auto;
+    border: 0;
+    vertical-align: top;
+}
+
+%image--circle { border-radius: 50%; }
+%image--hexagon { clip-path: polygon(75% 6.699%, 100% 50%, 75% 93.301%, 25% 93.301%, 0% 50%, 25% 6.699%); } // Unit hexagon
+%image--inline {
+    display: inline-block;
+    width: 1em;
+    line-height: 1;
+    vertical-align: middle;
+}
+%image--fluid { max-width: 100%; }

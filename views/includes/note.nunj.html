@@ -1,0 +1,21 @@
+<article class="{{ note.type or 'h-entry' }}" >
+
+  <header>
+    {% if note.prop('name') %}
+    <h3 class="p-name">{{ note.prop('name') }}</h3>
+    {% else %}
+    <data class="p-name"></data>
+    {% endif %}
+  </header>
+  
+  <div class="e-content">{{ note.prop('content').value }}</div>
+
+  <footer>
+    <p>
+      <a class="u-url" href="{{ note.permalink }}">
+        <time class="dt-published" datetime="{{ note.prop('published') | date() }}">{{ note.prop('published') | date('fromNow') }}</time>
+      </a>
+    </p>
+  </footer>
+  
+</article>

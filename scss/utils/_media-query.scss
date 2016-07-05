@@ -1,0 +1,15 @@
+@mixin media-query($alias) {
+
+    @each $breakpoint in $breakpoints {
+        $key:       nth($breakpoint, 1);
+        $value:     nth($breakpoint, 2);
+
+        // If the media query we’ve specified has an alias and a condition...
+        @if $alias == $key and $value {
+            @media #{$value} {
+                @content;
+            }
+        }
+    }
+
+}

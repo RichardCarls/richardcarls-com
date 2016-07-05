@@ -1,0 +1,10 @@
+<div class="toolbar toolbar--top" style="text-align: right;">
+  <div style="display: inline-block;">
+    <span>Hello {{ user.name or user.uid or 'Friend' }}</span><br />
+    {% if user %}
+    <a href="{{ locals.site.url }}/auth/logout">sign out</a>
+    {% else %}
+    <a href="{{ locals.site.url }}/auth/login">sign in</a>
+    {% endif %}
+  </div>
+</div>

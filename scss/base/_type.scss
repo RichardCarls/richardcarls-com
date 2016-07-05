@@ -1,0 +1,75 @@
+$body-font-family:              'Palatino', serif                             !default;
+$body-font-weight:              normal                                        !default;
+$body-font-size:                $base-font-size                               !default;
+$body-line-height:              $base-line-height                             !default;
+
+$headings-font-family:          'Helvetica', 'Arial', sans-serif              !default;
+$headings-font-weight:          bold                                          !default;
+$headings-line-height:          $base-line-height                             !default;
+$headings-size-1:               em(36) !default;
+$headings-size-2:               em(30) !default;
+$headings-size-3:               em(24) !default;
+$headings-size-4:               em(20) !default;
+$headings-size-5:               em(16) !default;
+$headings-size-6:               em(14) !default;
+
+$mono-font-family:              'Lucida Console', 'Courier', monospace        !default;
+$mono-font-weight:              normal                                        !default;
+$mono-line-height:              1.0                                           !default;
+
+$content-line-length:           37.5em                                        !default;
+
+
+html {
+    -webkit-text-size-adjust:   100%;
+        -ms-text-size-adjust:   100%;
+     -moz-osx-font-smoothing:   grayscale;
+      -webkit-font-smoothing:   antialiased;
+}
+
+body { @extend %type--body; }
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 { @extend %type--headings; }
+
+h1 { font-size: $headings-size-1; }
+h2 { font-size: $headings-size-2; }
+h3 { font-size: $headings-size-3; }
+h4 { font-size: $headings-size-4; }
+h5 { font-size: $headings-size-5; }
+h6 { font-size: $headings-size-6; }
+
+
+code,
+pre { @extend %type--mono; }
+
+p,
+blockquote {
+    @extend %content;
+}
+
+
+%type--body {
+    font-family: $body-font-family;
+    font-weight: $body-font-weight;
+    line-height: $body-line-height;
+}
+
+%type--headings {
+    font-family: $headings-font-family;
+    font-weight: $headings-font-weight;
+    line-height: $headings-line-height;
+}
+
+%type--mono {
+    font-family: $mono-font-family;
+    font-weight: $mono-font-weight;
+    line-height: $mono-line-height;
+}
+
+%content { max-width: $content-line-length; }
