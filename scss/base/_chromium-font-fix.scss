@@ -1,0 +1,15 @@
+/* Fixes web fonts not rendering in Chromium on Linux */
+/* @see https://bugs.chromium.org/p/chromium/issues/detail?id=336476 */
+
+body {
+    animation-duration: 0.1s;
+	animation-name: fontfix;
+	animation-iteration-count: 1;
+	animation-timing-function: linear;
+	animation-delay: 0.1s;
+}
+
+@keyframes fontfix {
+	from { 	width: 99.9999%; }
+	to { width: 100%; }
+}

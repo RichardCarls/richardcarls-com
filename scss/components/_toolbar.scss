@@ -1,0 +1,16 @@
+$toolbar-background: transparent !default;
+$toolbar-font-color: #000 !default;
+
+%toolbar,
+.toolbar {
+    padding: 1.5em;
+    color: $toolbar-font-color;
+    background-color: $toolbar-background;
+
+    &--top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+}

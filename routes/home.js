@@ -1,8 +1,8 @@
 var path = require('path');
 var router = require('express').Router(); // eslint-disable-line new-cap
 
-var app = require(path.relative(__dirname, 'app.js'));
-var logger = require(path.relative(__dirname, 'lib/logger.js'));
+var app = require(path.resolve(__dirname, '../app'));
+var logger = require(path.resolve(__dirname, '../lib/logger.js'));
 
 router.get('/', function(req, res) {
   return res.render('home/home.nunj.html', {
@@ -12,19 +12,3 @@ router.get('/', function(req, res) {
 });
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

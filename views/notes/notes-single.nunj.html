@@ -1,0 +1,16 @@
+{% extends '../page.nunj.html' %}
+
+{% block title %}Richard Carls | {{ note.name or 'Untitled Note' }}{% endblock %}
+
+{% block header %}
+<h1>{{ note.name or 'Untitled Note' }}</h1>
+{% endblock %}
+
+{% block content %}
+<section class="page-section h-entry">
+  <div class="e-content" >{{ note.content }}</div>
+  <p><a href="{{ note.url }}">
+    <time class="dt-published" datetime="{{ note.published | date() }}">{{ note.published | date('fromNow') }}</time>
+  </a></p>
+</section>
+{% endblock %}\

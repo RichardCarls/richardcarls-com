@@ -1,0 +1,37 @@
+$hcard-padding-vertical:            em(24) !default;
+$hcard-padding-horizontal:          em(16) !default;
+
+$hcard-avatar-size:                 em(120) !default;
+
+%site-hcard,
+.site-hcard {
+    
+    padding: $hcard-padding-vertical $hcard-padding-horizontal;
+    text-align: center;
+    
+    .avatar {
+        @extend %image;
+        @extend %image--circle;
+        
+        width: $hcard-avatar-size;
+    }
+    
+    .info {
+        @extend %list--no-style;
+        
+        .name {
+            @extend %type--headings;
+            
+            margin: 0.67em 0;
+            font-size: em(36);
+        }
+        
+        .tagline,
+        .location,
+        .affiliation {
+            @extend %type--headings;
+            
+            font-size: em(16);
+        }
+    }
+}

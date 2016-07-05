@@ -1,0 +1,30 @@
+$base-font-size:             16px !default;
+$base-font-size--desktop:    28px !default;
+$base-line-height:           24px !default;
+$base-font-color:            #000000 !default;
+$base-background-color:      #ffffff !default;
+$base-box-sizing:            border-box !default;
+
+html {
+    font-size: $base-font-size;
+    line-height: $base-line-height;
+    background-color: $base-background-color;
+    color: $base-font-color;
+    overflow-y: scroll;
+    min-height: 100%;
+    box-sizing: $base-box-sizing;
+    
+    @include media-query(desktop) {
+        font-size: $base-font-size--desktop;
+    }
+}
+
+* {
+
+    &,
+    &:before,
+    &:after {
+        box-sizing: inherit;
+    }
+
+}

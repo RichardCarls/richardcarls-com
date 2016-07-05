@@ -1,0 +1,42 @@
+<!-- Representative hCard -->
+{% set me = locals.me %}
+<div class="site-hcard h-card">
+  
+  <!-- Logo / Photo -->
+  <figure class="avatar">
+    <img class="u-photo" src="https://placehold.it/320x320?text=Photo" />
+  </figure>
+  
+  <!-- Details -->
+  <dl class="info">
+    <dt class="name p-name"><span class="given-name">{{ me.firstName }}</span> <span class="family-name">{{ me.lastName }}</span></dt>
+    <dd class="tagline">{{ me.tagline }}</dd>
+    <dd class="affiliation">
+      <span class="p-job-title">{{ me.jobTitle }}</span>,
+      <span class="p-org">
+        <a href="{{ me.employer.url }}">{{ me.employer.name }}</a>
+      </span>
+    </dd>
+    <dd class="location">
+      <span class="p-locality">{{ me.locality }}</span>,
+      <abbr class="p-region" title="{{ me.region.full }}">{{ me.region.abbr }}</abbr>,
+      <abbr class="p-country-name" title="{{ me.country.full }}">{{ me.country.abbr }}</abbr>
+    </dd>
+    <dd>
+      <ul class="list inline">
+        {% for profile in me.profiles %}
+        <li><a class="u-url{% if profile.uid %} u-uid{% endif %}" rel="me" href="{{ profile.url }}">{{ profile.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </dd>
+  </dl>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <ol class="list inline">
+    {% for page in site.pages %}
+    <li><a href="{{ page.path }}">{{ page.name }}</a></li>
+    {% endfor %}
+  </ol>
+</nav>

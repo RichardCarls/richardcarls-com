@@ -1,0 +1,11 @@
+%container,
+.container {
+    
+    &:before,
+    &:after {
+        content: '';
+        display: table;    // Prevents margin collapse
+        height: 0;
+    }
+    
+}
