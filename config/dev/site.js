@@ -7,7 +7,8 @@ module.exports = {
   tokenEndpoint: 'https://tokens.indieauth.com/token',
   micropubEndpoint: siteUrl + '/micropub',
   pages: [
-    { name: 'Home', path: '/home', },
+    { name: 'Home', path: '/', },
+    { name: 'Notes', path: '/notes', },
     { name: 'Client', path: '/client', },
   ],
 };
