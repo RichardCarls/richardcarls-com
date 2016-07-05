@@ -1,5 +1,9 @@
 node_modules
+
 logs
-/.projectile
-/.tern*
-public_http
+npm-debug.log*
+
+.projectile
+.tern*
+
+public_http/assets/*

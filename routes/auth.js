@@ -1,9 +1,14 @@
 var path = require('path');
 var logger = require(path.resolve(__dirname, '../lib/logger'));
 var router = require('express').Router(); // eslint-disable-line new-cap
+var bodyParser = require('body-parser');
 var passport = require('passport');
+var csurf = require('csurf');
 
 var app = require(path.resolve(__dirname, '../app'));
+
+router.use(bodyParser.urlencoded({ extended: true, }));
+router.use(csurf());
 
 router.all('/', passport.authenticate(['indieauth',], {
   successRedirect: '/#successauth',

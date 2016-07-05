@@ -2,26 +2,12 @@
 
 {% block title %}Richard Carls | Home{% endblock %}
 
-{% block content %}
+{% block header %}
 <h1>Home</h1>
+{% endblock %}
 
-<ul>
-  {% for page in locals.site.pages %}
-  <li><a href="{{ page.path }}">{{ page.name }}</a></li>
-  {% endfor %}
-</ul>
-
-<div class="h-card">
-  <h3 class="p-name">
-    <span class="p-given-name">Richard</span> <span class="p-family-name">Carls</span>
-  </h3>
-  
-  <h4>Me Around the Web</h4>
-  <ul>
-      {% for profile in locals.me.profiles %}
-      <li>{{ profile.name }}: <a rel="me" class="u-url{% if profile.uid %} u-uid{% endif %}"
-				 href="{{ profile.url }}">{{ profile.url }}</a></li>
-      {% endfor %}
-  </ul>
-</div>
+{% block content %}
+<section class="page-section">
+  <p>TBD</p>
+</section>
 {% endblock %}

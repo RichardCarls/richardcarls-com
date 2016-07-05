@@ -2,52 +2,86 @@
 
 {% block title %}Richard Carls | Client{% endblock %}
 
-{% block content %}
+{% block header %}
 <h1>Client</h1>
+{% endblock %}
 
-{% if user %}
-<form id="micropub"
-      action="{{ locals.client.endpoint }}"
-      method="post">
-  <fieldset>
-    <legend>Simple Micropub Form</legend>
+{% block content %}
+<section class="page-section" >
+  {% if user %}
+  <form id="micropub"
+        class="form" 
+        action="{{ locals.client.endpoint }}"
+        method="post">
 
-    <h3>Posting to <strong>{{ user.micropub }}</strong></h3>
+    <fieldset>
+      <legend>Micropub Endpoint</legend>
+      {% for url in user.micropub %}
+      <div class="input-wrap" >
+        <input type="radio"
+               id="endpoint-{{ loop.index }}"
+               name="endpoint"
+               value="{{ url }}" />
+        <label for="endpoint-{{ loop.index }}">{{ url }}</label>
+      </div>
+      {% endfor %}
+    </fieldset>
 
-    <div>
-      <label for="content">Content</label>
-      <textarea id="content" name="content"
-	        placeholder="Write something&hellip;"></textarea>
-    </div>
+    <fieldset>
+      <legend>Response</legend>
+      
+      <div class="input-wrap">
+        <label for="in-reply-to">Reply <small>(in-reply-to)</small></label>
+        <input type="url"
+               id="in-reply-to"
+               name="in-reply-to"
+               placeholder="Reply to something" />
+      </div>
+      
+      <div class="input-wrap">
+        <label for="like-of">Like <small>(like-of)</small></label>
+        <input type="url"
+               id="like-of"
+               name="like-of"
+               placeholder="Like something" />
+      </div>
+    </fieldset>
 
-    <div>
-      <label for="category">Category</label>
-      <input type="text" id="category"
-             name="category"
-             placeholder="Cat1, Cat2, etc." />
-    </div>
+    <fieldset>
+      <legend>Content</legend>
+
+      <div class="input-wrap">
+        <label for="name">Title <small>(Name)</small></label>
+        <input type="text"
+               id="name"
+               name="name"
+               placeholder="My Note" />
+      </div>
+      
+      <div class="input-wrap">
+        <label for="content">Content <small>(content[value])</small></label>
+        <textarea id="content"
+                  name="content[value]"
+                  placeholder="Write something ..."></textarea>
+      </div>
+    
+      <div class="input-wrap">
+        <label for="category">Categories <small>(category[])</small></label>
+        <input type="text"
+               id="category"
+               name="category"
+               placeholder="Categories (comma-separated)" />
+      </div>
+    </fieldset>
     
     <input type="submit" value="Post" />
     
-    <input type="hidden" id="h" name="h" value="entry" />
+    <input type="hidden" name="h" type="hidden" value="entry" />
     <input type="hidden" name="_csrf" value="{{ _csrf }}" />
 
-  </fieldset>
-</form>
-{% else %}
-<h3>Web Sign-in</h3>
-<form id="login"
-      action="{{ locals.site.url }}/auth"
-      method="post">
-
-  <label for="me">Your Rel-Me-Auth-enabled Domain</label>
-  <input type="url"
-	 name="me"
-	 placeholder="https://example.com" />
-
-  <input type="submit" value="Sign in" />
-
-  <input type="hidden" name="_csrf" value="{{ _csrf }}" />  
-</form>
-{% endif %}
+  </form>
+  {% else %}
+  <h3>Login required</h3>
+  {% endif %}
+</section>
 {% endblock %}

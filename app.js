@@ -3,13 +3,12 @@ var express = require('express');
 var morgan = require('morgan');
 var helmet = require('helmet');
 var cors = require('cors');
-var bodyParser = require('body-parser');
-var csurf = require('csurf');
 var passport = require('passport');
 var IndieAuthStrategy = require('@rcarls/passport-indieauth');
 var AnonymousStrategy = require('passport-anonymous');
 var cookieSession = require('cookie-session');
 var mongoose = require('mongoose');
+var autoIncrement = require('mongoose-auto-increment');
 var nunjucks = require('nunjucks');
 
 var logger = require(path.resolve(__dirname, 'lib/logger'));
@@ -35,10 +34,7 @@ app
   .use(morgan('dev', { stream: logger.stream, }))
   .use(helmet())
   .use(cors())
-  .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: true, }))
-  .use(cookieSession(config.session))
-  .use(csurf());
+  .use(cookieSession(config.session));
 
 // Database
 logger.info('Attempting to connect to MongoDB at ' + config.mongoose.uri);
@@ -48,8 +44,15 @@ var db = mongoose.connection;
 db.on('connected', function() {
   logger.info('Established connection to MongoDB');
 
-  var Note = mongoose.model('Note', require(path.resolve(__dirname, './models/note')));
+  autoIncrement.initialize(db);
 
+  // Clear notes
+  var Note = require('./models/note');
+  Note.remove({}, function(err) {});
+
+  // Reset note ID count
+  Note.resetCount(function(err) {});
+  
   // Passport
   app.use(passport.initialize());
   app.use(passport.session());
@@ -57,14 +60,15 @@ db.on('connected', function() {
   passport.use(new IndieAuthStrategy({
     clientId: config.site.url + '/',
     redirectUri: config.site.url + '/auth',
+    scopeDelimiter: ',', // for node-micropub-express
     passReqToCallback: true,
-  }, function(req, domain, scope, profile, done) {
+  }, function(req, uid, token, profile, done) {
     var user = {
-      me: domain,
-      scope: scope,
+      uid: uid,
+      token: token,
     };
 
-    // TODO: Save as Person, only save domain+scope in session
+    // TODO: Save as Person, include uid, token, micropub endpoint in session
 
     if (profile.name.formatted) {
       user.name = profile.name.formatted;
@@ -99,6 +103,7 @@ db.on('connected', function() {
     new nunjucks.FileSystemLoader('views', { noCache: true, }),
     { autoescape: true, }
   );
+  viewsEnv.addFilter('date', require('nunjucks-date-filter'));
   viewsEnv.express(app);
 
   // Headers
@@ -111,14 +116,21 @@ db.on('connected', function() {
     return next();
   });
 
+  // Micropub
+  app.use('/micropub', require(path.resolve(__dirname, './routes/micropub')));
+
+  // Client
+  app.use('/client', require(path.resolve(__dirname, './routes/client')));
+
   // Auth
   app.use('/auth', require(path.resolve(__dirname, './routes/auth')));
+
+  // Enable user session
   app.use(passport.authenticate(['indieauth', 'anonymous',]));
 
   // Routing
-  app
-    .use('/client', require(path.resolve(__dirname, './routes/client')))
-    .use('/', require(path.resolve(__dirname, './routes/home')));
+  app.use('/notes', require(path.resolve(__dirname, './routes/notes')));
+  app.use('/', require(path.resolve(__dirname, './routes/home')));
 });
 
 db.on('error', function(err) {

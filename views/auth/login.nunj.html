@@ -3,28 +3,45 @@
 {% block title %}Richard Carls | Sign in{% endblock %}
 
 {% block content %}
-<h1>Sign in</h1>
+<section class="page-section">
+  <h1>Sign in</h1>
 
-<h3>Web Sign-in</h3>
-<form id="login"
-      action="{{ locals.site.url }}/auth"
-      method="post">
+  <h3>Web Sign-in</h3>
+  <form id="login"
+        action="{{ locals.site.url }}/auth"
+        method="post">
 
-  <label for="me">Your Rel-Me-Auth-enabled Domain</label>
-  <input type="url"
-	 name="me"
-	 placeholder="https://example.com" />
+    <div class="input-wrap">
+      <label for="me">Your Rel-Me-Auth-enabled Domain</label>
+      <input type="url"
+             id="me" 
+	     name="me"
+	     placeholder="https://example.com" />
+    </div>
+    
+    <fieldset>
+      <legend>Authorize scopes:</legend>
 
-  <fieldset>
-    <legend>Authorize scopes:</legend>
-    <label for="scope-post">Post</label>
-    <input type="checkbox" id="scope-post" name="scope[]" value="post" />
-    <label for="scope-edit">Edit</label>
-    <input type="checkbox" id="scope-edit" name="scope[]" value="edit" />
-  </fieldset>
-  
-  <input type="submit" value="Sign in" />
+      <div class="input-wrap" >
+        <input type="checkbox"
+               id="scope-create"
+               name="scope[]"
+               value="create" />
+        <label for="scope-create">Create</label>
+      </div>
 
-  <input type="hidden" name="_csrf" value="{{ _csrf }}" />  
-</form>
+      <div class="input-wrap" >
+        <input type="checkbox"
+               id="scope-edit"
+               name="scope[]"
+               value="edit" />
+        <label for="scope-edit">Edit</label>
+      </div>
+    </fieldset>
+    
+    <input type="submit" value="Sign in" />
+
+    <input type="hidden" name="_csrf" value="{{ _csrf }}" />  
+  </form>
+</section>
 {% endblock %}

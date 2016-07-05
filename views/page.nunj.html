@@ -8,6 +8,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     
     <title>{% block title %}Richard Carls{% endblock %}</title>
+
+    <link rel="stylesheet"
+          type="text/css"
+          media="screen"
+          href="/assets/css/richardcarls.css" />
     
     <!-- RelMeAuth Profiles -->
     {% for profile in locals.me.profiles %}
@@ -24,17 +29,20 @@
     <link rel="openid.server" href="https://indieauth.com/openid" />
   </head>
   <body>
-    <div>
-      {% if user %}
-      <span>You are signed in as <strong>{{ user.me }}</strong></span>
-      <span>with scope {{ user.scope }}</span>.<br />
-      <a href="{{ locals.site.url }}/auth/logout">sign out</a>
-      {% else %}
-      <span>You are not currently signed in.</span><br />
-      <a href="{{ locals.site.url }}/auth/login">sign in</a>
-      {% endif %}
-    </div>
-    <main>
+    {% block sidebar %}
+    <header class="site-sidebar" style="background: #999999;">
+      {% include 'includes/sidebar.nunj.html' %}
+    </header>
+    {% endblock %}
+    
+    <main class="site-main {% block contentclass %}{% endblock %}">
+      {% include 'includes/dashboard.nunj.html' %}
+      
+      <header class="page-header">
+        {% block header %}
+        {% endblock %}
+      </header>
+      
       {% block content %}
       {% endblock %}
     </main>
