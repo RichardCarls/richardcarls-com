@@ -1,18 +1,39 @@
 var logger = require('../lib/logger');
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var app = require('../app');
-var slug = require('slug');
+var slugify = require('slug');
 var autoIncrement = require('mongoose-auto-increment');
-var moment = require('moment');
 
-slug.defaults.mode='rfc3986';
+slugify.defaults.mode='rfc3986';
+
+var rsvpValues = [
+  'invited', 'yes', 'no', 'maybe', 'interested',
+];
 
 var noteSchema = new mongoose.Schema({
   _noteId: { type: Number, },
-  _slug: { type: String, index: { unique: true, sparse: true, }, },
-  
-  type: { type: String, set: setType, get: getType, },
-  properties: { type: Object, },
+  _content: { type: String, },
+
+  name: { type: String, },
+  slug: { type: String, required: true, index: { unique: true, }, },
+  summary: { type: String, },
+  published: { type: Date, required: true, default: Date.now(), },
+  updated: { type: Date, },
+  category: { type: [String], },
+  //location: {},
+  syndication: { type: [String], },
+  rsvp: { type: String, enum: rsvpValues, },
+  photo: { type: [String], },
+  video: { type: [String], },
+  audio: { type: [String], },
+
+  'in-reply-to': { type: [String], ref: 'NoteContext', },
+  'like-of': { type: [String], ref: 'NoteContext', },
+  'repost-of': { type: [String], ref: 'NoteContext', },
+  'bookmark-of': { type: [String], ref: 'NoteContext', },
+
+  comment: [{ type: String, ref: 'NoteContext', }],
 }, {
   strict: false,
   toObject: { virtuals: true, },
@@ -21,69 +42,76 @@ var noteSchema = new mongoose.Schema({
 
 noteSchema.plugin(autoIncrement.plugin, { model: 'Note', field: '_noteId', });
 
-noteSchema.virtual('permalink').get(function() {
-  return [
-    app.locals.site.url,
-    'notes',
-    this._slug
-  ].join('/');
-});
+noteSchema.virtual('type')
+  .get(function() {
+    return 'entry';
+  });
 
-noteSchema.methods.prop = function(prop) {
-  var value = this.properties[prop];
+noteSchema.virtual('url')
+  .get(function() {
+    return [
+      app.locals.site.url,
+      'notes',
+      this.slug
+    ].join('/');
+  });
 
-  if (typeof value === 'undefined') {
-    return null;
-  }
+noteSchema.virtual('content')
+  .get(function() {
+    return {
+      'content-type': 'text/plain',
+      value: this._content,
+    };
+  })
+  .set(function(value) {
+    if (!Array.isArray(value)) { value = [value]; }
 
-  if (Array.isArray(value)) {
-    if (value.length === 1) {
-      return value[0];
-    }
+    this._content = _.get(_.find(value, { 'content-type': 'text/plain', }), 'value');
+  });
 
-    return value;
-  }
+noteSchema.virtual('author')
+  .get(function() {
+    return app.locals.site.url + '/';
+  });
 
-  return null;
+noteSchema.virtual('mentions')
+  .get(function() {
+    var mentions = [].concat(
+      this['in-reply-to'],
+      this['repost-of'],
+      this['like-of'],
+      this['bookmark-of']
+    );
+    
+    mentions = _.uniq(_.compact(mentions));
+    
+    return mentions;
+  });
+
+noteSchema.statics.findByUrl = function(url, callback) {
+  return this.findOne({
+    slug: url.substr(url.lastIndexOf('/') + 1),
+  }, callback);
 };
 
-function getType(value) {
-  return [value];
-}
-
-function setType(value) {
-  if (!Array.isArray(value)) {
-    return [value];
-  }
-
-  return value;
-}
-
 noteSchema.pre('validate', function(next) {
-  // Enforce published
-  var published = this.properties.published;
-  if (Array.isArray(published)) {
-    published = published[0];
-  }
-  published = moment(published) || moment();
-  this.properties.published = [published];
-  
-  // Populate slug
-  if (!this._slug) {
-    var name = this.properties.name;
-    logger.debug('name', name);
-    if (name && name.length) {
-      this._slug = slug(name);
+  var note = this;
+
+  if (!note.slug) {
+    if (note.name) {
+      note.slug = slugify(note.name);
+      return next();
     } else {
-      this.nextCount(function(err, count) {
+      note.nextCount(function(err, count) {
         if (err) { return next(err); }
         
-        this._slug = 'untitled-' + count;
+        note.slug = 'untitled-' + count;
+        return next();
       });
     }
+  } else {
+    return next();
   }
-
-  return next();
 });
 
 module.exports = mongoose.model('Note', noteSchema);

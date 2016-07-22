@@ -23,14 +23,14 @@
     <link rel="authorization_endpoint" href="{{ locals.site.authorizationEndpoint }}" />
     <link rel="token_endpoint" href="{{ locals.site.tokenEndpoint }}" />
     <link rel="micropub" href="{{ locals.site.micropubEndpoint }}" />
-    <!--<link rel="webmention" href="{{ site.webmentionEndpoint }}" />-->
+    <link rel="webmention" href="{{ site.webmentionEndpoint }}" />
 
     <link rel="openid.delegate" href="{{ locals.site.url }}" />
     <link rel="openid.server" href="https://indieauth.com/openid" />
   </head>
   <body>
     {% block sidebar %}
-    <header class="site-sidebar" style="background: #999999;">
+    <header class="site-sidebar">
       {% include 'includes/sidebar.nunj.html' %}
     </header>
     {% endblock %}

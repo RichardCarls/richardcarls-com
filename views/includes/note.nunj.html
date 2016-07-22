@@ -1,21 +1,51 @@
-<article class="{{ note.type or 'h-entry' }}" >
+<article class="h-{{ note.type }}" >
 
   <header>
-    {% if note.prop('name') %}
-    <h3 class="p-name">{{ note.prop('name') }}</h3>
+    {% if note.name %}
+    <h3 class="p-name">{{ note.name }}</h3>
     {% else %}
     <data class="p-name"></data>
     {% endif %}
   </header>
+
+  {% if note['in-reply-to'].length %}
+  <aside>
+    <p>In reply to <a class="u-in-reply-to" href="{{ note['in-reply-to'] }}">{{ note['in-reply-to'] }}</a>.</p>
+  </aside>
+  {% endif %}
   
-  <div class="e-content">{{ note.prop('content').value }}</div>
+  <div class="e-content" style="white-space: pre-wrap;">{{ note.content.value }}</div>
 
   <footer>
     <p>
-      <a class="u-url" href="{{ note.permalink }}">
-        <time class="dt-published" datetime="{{ note.prop('published') | date() }}">{{ note.prop('published') | date('fromNow') }}</time>
-      </a>
+      <a class="u-url" href="{{ note.url }}">
+        <time class="dt-published" datetime="{{ note.published | date() }}">{{ note.published | date('fromNow') }}</time>
+      </a><br />
+      <a rel="author" class="p-author h-card" href="{{ site.url }}">{{ me.firstName }} {{ me.lastName }}</a>
     </p>
   </footer>
+
+  {% if note.comment %}
+  <aside>
+    <h3>Comments</h3>
+    <ol>
+      {% for comment in note.comment %}
+      <li>
+        <div class="p-comment">
+          {% if comment.name %}
+          <h4 class="p-name">{{ comment.name }}</h4>
+          {% endif %}
+          <div class="e-content" style="white-space: pre-wrap;">{{ comment.content.value }}</div>
+          <p>
+            <a class="u-url" href="{{ comment.url }}">
+              <time class="dt-published" datetime="{{ comment.published | date() }}">{{ comment.published | date('fromNow') }}</time>
+            </a>
+          </p>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </aside>
+  {% endif %}
   
 </article>

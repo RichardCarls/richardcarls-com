@@ -45,11 +45,14 @@ db.on('connected', function() {
   logger.info('Established connection to MongoDB');
 
   autoIncrement.initialize(db);
-
-  // Clear notes
+  
+  // Clear db
   var Note = require('./models/note');
+  var NoteContext = require('./models/note-context');
+  
   Note.remove({}, function(err) {});
-
+  NoteContext.remove({}, function(err) {});
+  
   // Reset note ID count
   Note.resetCount(function(err) {});
   
@@ -106,15 +109,8 @@ db.on('connected', function() {
   viewsEnv.addFilter('date', require('nunjucks-date-filter'));
   viewsEnv.express(app);
 
-  // Headers
-  app.use(function(req, res, next) {
-    res.links({
-      authorization_endpoint: config.site.authorizationEndpoint,
-      token_endpoint: config.site.tokenEndpoint,
-    });
-
-    return next();
-  });
+  // Webmention
+  app.use('/webmention', require(path.resolve(__dirname, './routes/webmention')));
 
   // Micropub
   app.use('/micropub', require(path.resolve(__dirname, './routes/micropub')));
@@ -127,6 +123,17 @@ db.on('connected', function() {
 
   // Enable user session
   app.use(passport.authenticate(['indieauth', 'anonymous',]));
+
+  // Headers
+  app.use(function(req, res, next) {
+    res.links({
+      authorization_endpoint: config.site.authorizationEndpoint,
+      token_endpoint: config.site.tokenEndpoint,
+      micropub: config.site.micropubEndpoint,
+    });
+
+    return next();
+  });
 
   // Routing
   app.use('/notes', require(path.resolve(__dirname, './routes/notes')));

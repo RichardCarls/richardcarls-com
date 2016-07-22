@@ -11,6 +11,7 @@
   "author": "Richard Carls (richard.j.carls@gmail.com)",
   "license": "ISC",
   "dependencies": {
+    "@rcarls/connect-webmention": "file:///projects/connect-webmention",
     "@rcarls/passport-indieauth": "^2.0.1",
     "body-parser": "^1.15.1",
     "connect-micropub": "file:///projects/connect-micropub",
@@ -20,8 +21,10 @@
     "express": "^4.13.4",
     "express-session": "^1.13.0",
     "helmet": "^2.1.0",
+    "indieutil": "file:///projects/node-indieutil",
+    "lodash": "^4.13.1",
     "moment": "^2.13.0",
-    "mongoose": "^4.4.17",
+    "mongoose": "^4.5.4",
     "mongoose-auto-increment": "^5.0.1",
     "morgan": "^1.7.0",
     "nunjucks": "^2.4.2",
@@ -33,6 +36,7 @@
     "request": "^2.72.0",
     "slug": "^0.9.1",
     "underscore": "^1.8.3",
+    "webmentions": "github:glennjones/webmentions",
     "winston": "^2.2.0"
   },
   "devDependencies": {

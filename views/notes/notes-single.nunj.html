@@ -7,10 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="page-section h-entry">
-  <div class="e-content" >{{ note.content }}</div>
-  <p><a href="{{ note.url }}">
-    <time class="dt-published" datetime="{{ note.published | date() }}">{{ note.published | date('fromNow') }}</time>
-  </a></p>
+<section class="page-section">
+  {% include '../includes/note.nunj.html' %}
 </section>
 {% endblock %}\

@@ -21,7 +21,8 @@
         <input type="radio"
                id="endpoint-{{ loop.index }}"
                name="endpoint"
-               value="{{ url }}" />
+               value="{{ url }}"
+               {% if loop.first %}checked{% endif %} />
         <label for="endpoint-{{ loop.index }}">{{ url }}</label>
       </div>
       {% endfor %}

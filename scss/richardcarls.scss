@@ -47,7 +47,6 @@ $content-page-gutter:                         em(80);
 $sidebar-width:                               em(320);
 $sidebar-avatar-size:                         em(120);
 
-
 /* BASE */
 @import "base/normalize",
         "base/page",
@@ -81,11 +80,11 @@ $page-gutter:                         $content-page-gutter;                     
 
 @import "components/page";
 
-$hcard-padding-vertical:                    $content-padding-vertical-edge;
-$hcard-padding-horizontal:                  $content-padding-horizontal;
-$hcard-avatar-size:                         $sidebar-avatar-size;
+$sidebar-padding-vertical:                  $content-padding-vertical-edge;
+$sidebar-padding-horizontal:                $content-padding-horizontal;
+$sidebar-background-color:                  #efefef;
 
-@import "components/site-hcard";
+@import "components/sidebar";
 
 $notes-list-spacing:                        $content-padding-vertical-edge;
 $notes-border-size:                         1px;

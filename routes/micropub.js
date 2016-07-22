@@ -6,6 +6,8 @@ var BearerStrategy = require('passport-http-bearer');
 var request = require('request');
 var qs = require('querystring');
 var micropub = require('connect-micropub');
+var webmentions = require('webmentions');
+var indieutil = require('indieutil');
 
 var app = require(path.resolve(__dirname, '../app'));
 var Note = require(path.resolve(__dirname, '../models/note.js'));
@@ -28,14 +30,17 @@ passport.use(new BearerStrategy({}, function(token, done) {
     body = qs.parse(body);
 
     // Check scope
-    if (!body.scope || body.scope.split(' ').indexOf('create') === -1) {
+    var scopes = body.scope.split(' ');
+    if (!body.scope || scopes.indexOf('create') === -1 && scopes.indexOf('post') === -1) {
       return done({ message: '[create] scope required', });
     }
 
     // Check client ID
+    /*
     if (body.client_id !== app.locals.site.url + '/') {
       return done({ message: 'client not authorized', });
     }
+    */
 
     return done(null, qs.parse(body));
   });
@@ -45,9 +50,7 @@ router.post('', [
   passport.authenticate('bearer', { session: false, }),
   micropub.create()
 ], function(req, res) {
-  logger.debug(req.micropub);
-
-  new Note(req.micropub)
+  new Note(indieutil.toJf2(req.micropub))  
     .save(function(err, note) {
       if (err) {
         logger.error(err);
@@ -55,9 +58,21 @@ router.post('', [
         return res.status(500).send();
       }
 
-      logger.info('Created new note', note.permalink);
+      logger.info('Created new note', note.url);
+      
+      res.location(note.url).status(201).send();
 
-      return res.location(note.permalink).status(201).send();
+      // Send webmentions
+      note.mentions.map(function(target) {
+        webmentions.proxyMention({
+          source: note.url,
+          target: target,
+        }, function(err, data) {
+          if (err) { logger.warn(err); return; }
+
+          logger.info(data.message);
+        });
+      });
     });
 });
 

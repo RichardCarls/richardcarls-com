@@ -6,6 +6,7 @@ module.exports = {
   authorizationEndpoint: 'https://indieauth.com/auth',
   tokenEndpoint: 'https://tokens.indieauth.com/token',
   micropubEndpoint: siteUrl + '/micropub',
+  webmentionEndpoint: siteUrl + '/webmention',
   pages: [
     { name: 'Home', path: '/', },
     { name: 'Notes', path: '/notes', },
