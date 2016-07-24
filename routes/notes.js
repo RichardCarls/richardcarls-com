@@ -21,7 +21,10 @@ router.get('/', function(req, res) {
 
 router.get('/:slug', function(req, res) {
   Note.findOne({ slug: req.params.slug, })
-    .populate('comment')
+    .populate({
+      path: 'comment',
+      populate: { path: 'author', },
+    })
     .exec(function (err, note) {
       if (err || !note) {
         logger.error('Problem fetching note', err);

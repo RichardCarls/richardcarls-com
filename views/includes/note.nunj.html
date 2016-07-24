@@ -21,7 +21,7 @@
       <a class="u-url" href="{{ note.url }}">
         <time class="dt-published" datetime="{{ note.published | date() }}">{{ note.published | date('fromNow') }}</time>
       </a><br />
-      <a rel="author" class="p-author h-card" href="{{ site.url }}">{{ me.firstName }} {{ me.lastName }}</a>
+      <a class="p-author h-card" href="{{ site.url }}">{{ me.firstName }} {{ me.lastName }}</a>
     </p>
   </footer>
 
@@ -32,9 +32,10 @@
       {% for comment in note.comment %}
       <li>
         <div class="p-comment">
-          {% if comment.name %}
-          <h4 class="p-name">{{ comment.name }}</h4>
-          {% endif %}
+          <figure class="image">
+            <img src="{{ comment.author.photo }}" />
+          </figure>
+          <h4>{{ comment.author.name }}</h4>
           <div class="e-content" style="white-space: pre-wrap;">{{ comment.content.value }}</div>
           <p>
             <a class="u-url" href="{{ comment.url }}">

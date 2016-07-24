@@ -49,9 +49,11 @@ db.on('connected', function() {
   // Clear db
   var Note = require('./models/note');
   var NoteContext = require('./models/note-context');
+  var Person = require('./models/person');
   
   Note.remove({}, function(err) {});
   NoteContext.remove({}, function(err) {});
+  Person.remove({}, function(err) {});
   
   // Reset note ID count
   Note.resetCount(function(err) {});

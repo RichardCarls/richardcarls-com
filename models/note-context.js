@@ -12,7 +12,7 @@ var noteContextSchema = new mongoose.Schema({
   accessed: { type: Date, required: true, default: Date.now(), },
   publication: { type: String, },
 
-  //author: { type: String, ref: 'Person', },
+  author: { type: String, ref: 'Person', },
 }, {
   toObject: { virtuals: true, },
   toJSON: {virtuals: true, },

@@ -88,10 +88,10 @@ noteSchema.virtual('mentions')
     return mentions;
   });
 
-noteSchema.statics.findByUrl = function(url, callback) {
+noteSchema.statics.findByUrl = function(url) {
   return this.findOne({
     slug: url.substr(url.lastIndexOf('/') + 1),
-  }, callback);
+  });
 };
 
 noteSchema.pre('validate', function(next) {
