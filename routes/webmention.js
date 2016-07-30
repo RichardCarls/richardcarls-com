@@ -28,40 +28,19 @@ router.post('/', bodyParser.urlencoded({ extended: false, }), function(req, res)
         throw new throwjs.badRequest('Source does not link to target');
       }
 
-      var response = indieutil.entryToCite(data.source.entry);
-      response = indieutil.toJf2(response);
-      response._id = data.source.url;
-      response.accessed = moment().format();
-
-      logger.debug('response', response);
-
-      var author = _.get(response, ['references', response.author,]);
-      if (!author) {
+      if (!data.source.entry.properties.author) {
         throw new throwjs.badRequest('Missing authorship information.');
       }
-      author._id = author.url;
 
-      return Q.all([
-        Note.findByUrl(data.target.url).exec(),
-        new NoteContext(response).save(),
-        new Person(author).save(),
-      ]);
+      return Note.findByUrl(data.target.url).exec();
     })
-    .spread(function(note, context, author) {
+    .then(function(note) {
       if (!note) {
         throw new throwjs.badRequest('Target could not be found.');
       }
-      
-      if (!context) {
-        throw new throwjs.internalServerError('Problem storing response.');
-      }
 
-      if (!author) {
-        throw new throwjs.internalServerError('Problem storing author.');
-      }
+      note.comment.push(req.body.source);
       
-      note.comment.push(context._id);
-
       return note.save();
     })
     .then(function(note) {

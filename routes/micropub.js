@@ -50,7 +50,10 @@ router.post('', [
   passport.authenticate('bearer', { session: false, }),
   micropub.create()
 ], function(req, res) {
-  new Note(indieutil.toJf2(req.micropub))  
+  new Note(indieutil.toJf2(req.micropub, {
+    preferredContentType: 'text/plain',
+    implicitContentType: false,
+  }))
     .save(function(err, note) {
       if (err) {
         logger.error(err);

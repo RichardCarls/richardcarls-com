@@ -36,7 +36,7 @@
             <img src="{{ comment.author.photo }}" />
           </figure>
           <h4>{{ comment.author.name }}</h4>
-          <div class="e-content" style="white-space: pre-wrap;">{{ comment.content.value }}</div>
+          <div class="e-content" style="white-space: pre-wrap;">{{ comment.content[1].value }}</div>
           <p>
             <a class="u-url" href="{{ comment.url }}">
               <time class="dt-published" datetime="{{ comment.published | date() }}">{{ comment.published | date('fromNow') }}</time>

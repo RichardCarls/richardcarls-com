@@ -20,24 +20,25 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:slug', function(req, res) {
-  Note.findOne({ slug: req.params.slug, })
-    .populate({
-      path: 'comment',
-      populate: { path: 'author', },
+  Note.findOne({ slug: req.params.slug, }).exec()
+    .then(function(note) {
+      return note.toJf2();
     })
-    .exec(function (err, note) {
-      if (err || !note) {
-        logger.error('Problem fetching note', err);
-        
-        return res.status(500).send();
-      }
-
+    .then(function(note) {
+      logger.debug('note', note);
+      
       return res.render('notes/notes-single.nunj.html', {
         locals: app.locals,
         user: req.user,
         note: note,
       });
+    })
+    .catch(function(err) {
+      logger.error(err);
+      
+      return res.status(404).send();
     });
+
 });
 
 module.exports = router;
