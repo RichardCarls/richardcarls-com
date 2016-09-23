@@ -1,0 +1,16 @@
+{% import '../_macros.nunj.html' as macros %}
+
+<footer>
+  <dl>
+    {% if note.category %}
+    <dt>Category</dt>
+    {% for category in note.category %}
+    <dd class="p-category">{{ category }}</dd>
+    {% endfor %}
+    {% endif %}
+    <dt>Author</dt>
+    <dd class="p-author h-card">{{ macros.inlineCard(site.me) }}</dd>
+    <dt>Published</dt>
+    <dd><a href="{{ note.url }}"><time class="dt-published" datetime="{{ note.published | date }}">{{ note.published | date('fromNow') }}<small>{{ note.published | date }}</small></time></a></dd>
+  </dl>
+</footer>

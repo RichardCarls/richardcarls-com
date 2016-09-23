@@ -1,0 +1,27 @@
+{% extends './page.nunj.html' %}
+
+{% block title %}{{ super() }} | {{ note.name or 'Untitled Note' }}{% endblock %}
+
+{% block mainclass %}h-entry{% endblock %}
+
+{% block main %}
+{% include './_partials/note-header.nunj.html' %}
+{% include './_partials/note-content.nunj.html' %}
+{% include './_partials/note-footer.nunj.html' %}
+
+<!-- Responses -->
+{% if note.responses %}
+<aside>
+  <h3>Responses</h3>
+  <ol>
+    {% for context in note.responses %}
+    <li>
+      {% set targetProperty = 'p-comment' %}
+      {% include './_partials/note-context.nunj.html' %}
+    </li>
+    {% endfor %}
+  </ol>
+</aside>
+{% endif %}
+
+{% endblock %}

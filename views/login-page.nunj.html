@@ -1,0 +1,34 @@
+{% extends './page.nunj.html' %}
+
+{% block title %}{{ super() }} | Login{% endblock %}
+
+{% block main %}
+<h1>Log in</h1>
+{% if not user %}
+<form method="post" action="/auth">
+  <label for="me">Your site's URL</label>
+  <input type="url"
+         id="me"
+         name="me"
+         placeholder="http://your-site.com" />
+
+  <fieldset>
+    <legend>Authorize scopes for <code>{{ site.url }}/</legend>
+    <input type="checkbox"
+           id="scope-create"
+           name="scope"
+           value="create" />
+    <label for="scope-create">Create</label>
+  </fieldset>
+
+  <input type="submit" value="Authorize" />
+
+  <input type="hidden"
+         name="_csrf"
+         value="{{ _csrf }}" />
+</form>
+{% else %}
+<p>You are already logged in.</p>
+<a href="/auth/logout">Log out</a>
+{% endif %}
+{% endblock %}

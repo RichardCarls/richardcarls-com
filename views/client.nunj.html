@@ -1,0 +1,65 @@
+{% extends './page.nunj.html' %}
+
+{% block title %}{{ super() }} | Client{% endblock %}
+
+{% block main %}
+<h1>Micropub Client</h1>
+{% if user %}
+<form method="post" action="/client/post">
+  <!-- TODO: Show preview of new note including reply context -->
+
+  <!-- endpoint -->
+  <!-- TODO: Allow user to select from list of endpoints -->
+  <!-- TODO: Allow user to manually enter an endpoint -->
+  <p>Using first discovered Micropub endpoint <code>{{ user.micropub[0] }}</code>.</p>
+  <input type="hidden"
+         name="endpoint"
+         value="{{ user.micropub[0] }}" />
+
+  <!-- type -->
+  <!-- TODO: Allow switching types (entry vs event, etc) -->
+  <input type="hidden"
+         name="h"
+         value="entry" />
+  
+  <!-- in-reply-to -->
+  <!-- TODO: Allow adding more URLs -->
+  <label for="in-reply-to-1">Reply to</label>
+  <input type="url"
+         id="in-reply-to-1"
+         name="in-reply-to[]"
+         placeholder="http://example.com/notes/1" />
+
+  <!-- name -->
+  <label for="name">Title</label>
+  <input type="text"
+         id="name"
+         name="name"
+         placeholder="Note Title" />
+
+  <!-- content -->
+  <label for="content">Content</label>
+  <textarea id="content"
+            name="content"
+            placeholder="lorem ipsum..."></textarea>
+
+  <!-- category -->
+  <!-- TODO: Autocomplete with user's ?q=config result -->
+  <label for="category">Tags</label>
+  <input type="text"
+         id="category"
+         name="category"
+         placeholder="Tag1, Tag2" />
+
+  <input type="submit"
+         value="Post Note" />
+
+  <input type="hidden"
+         name="_csrf"
+         value="{{ _csrf }}" />
+</form>
+{% else %}
+<!-- TODO: Show log in form here -->
+<p>You need to <a href="/auth/login">log in</a> to use the Micropub client.</p>
+{% endif %}
+{% endblock %}

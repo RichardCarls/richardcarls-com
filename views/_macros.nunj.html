@@ -1,0 +1,33 @@
+<!-- Inline h-card -->
+{% macro inlineCard(person) %}
+{% if person.photo %}
+<img class="u-photo" src="{{ person.photo }}"
+     alt="Profile photo of {{ person.name }}" />
+{% endif %}
+<a class="u-url" href="{{ person.url[0] }}"><span class="p-name">{{ person.name }}</span></a>
+<span>{{ person.url[0] }}</span>
+{% endmacro %}
+
+<!-- Action text for reply context -->
+{% macro replyActionText(prop) %}
+{% if prop == 'in-reply-to' %}
+Replying to
+{% elif prop == 'repost-of' %}
+Reposting
+{% elif prop == 'like-of' %}
+Liked
+{% elif prop == 'bookmark-of' %}
+Saved a bookmark of
+{% elif prop == 'tag-of' %}
+Tagged
+{% endif %}
+{% endmacro %}
+
+{% macro contextSubject(context) %}
+{% if context.postTypes.indexOf('article') != -1 %}
+<a class="u-url" href="{{ context.url }}">{{ context.name }}</a>
+{% else %}
+A <a class="u-url" href="{{ context.url }}">{{ context.postTypes[0] }}</a>
+{% endif %}
+by {{ inlineCard(context.author) }}
+{% endmacro %}

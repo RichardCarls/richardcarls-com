@@ -35,121 +35,142 @@ app
   .use(morgan('dev', { stream: logger.stream, }))
   .use(helmet())
   .use(cors())
-  .use(cookieSession(config.session));
+  .use(cookieSession(config.site.session));
 
-// Database
-logger.info('Attempting to connect to MongoDB at ' + config.mongoose.uri);
-mongoose.connect(config.mongoose.uri, config.mongoose.connectOptions);
 
-var db = mongoose.connection;
-db.on('connected', function() {
-  logger.info('Established connection to MongoDB');
+// Redis cache
+logger.info('Attempting to connect to Redis at ' + config.redis.uri);
 
-  autoIncrement.initialize(db);
-  
-  // Clear db
-  var Note = require('./models/note');
-  var NoteContext = require('./models/note-context');
-  var Person = require('./models/person');
-  
-  Note.remove({}, function(err) {});
-  NoteContext.remove({}, function(err) {});
-  Person.remove({}, function(err) {});
-  
-  // Reset note ID count
-  Note.resetCount(function(err) {});
-  
-  // Passport
-  app.use(passport.initialize());
-  app.use(passport.session());
-
-  passport.use(new IndieAuthStrategy({
-    clientId: config.site.url + '/',
-    redirectUri: config.site.url + '/auth',
-    scopeDelimiter: ',', // for node-micropub-express
-    passReqToCallback: true,
-  }, function(req, uid, token, profile, done) {
-    var user = {
-      uid: uid,
-      token: token,
-    };
-
-    // TODO: Save as Person, include uid, token, micropub endpoint in session
-
-    if (profile.name.formatted) {
-      user.name = profile.name.formatted;
-    }
-
-    if (profile.photos && profile.photos.length) {
-      user.photo = profile.photos[0].value;
-    }
-
-    if (profile._json.rels && profile._json.rels['micropub']) {
-      user.micropub = profile._json.rels['micropub'];
-    }
-
-    return done(null, user, {});
-  }));
-  passport.use(new AnonymousStrategy({}));
-
-  passport.serializeUser(function(user, done) {
-    // TODO: Save as Person to db
-    return done(null, user);
-  });
-
-  passport.deserializeUser(function(user, done) {
-    // TODO Load Person from domain key
-    return done(null, user);
-  });
-
-  logger.info('Database and sessions initialized');
-
-  // Views
-  var viewsEnv = new nunjucks.Environment(
-    new nunjucks.FileSystemLoader('views', { noCache: true, }),
-    { autoescape: true, }
-  );
-  viewsEnv.addFilter('date', require('nunjucks-date-filter'));
-  viewsEnv.express(app);
-
-  // Webmention
-  app.use('/webmention', require(path.resolve(__dirname, './routes/webmention')));
-
-  // Micropub
-  app.use('/micropub', require(path.resolve(__dirname, './routes/micropub')));
-
-  // Client
-  app.use('/client', require(path.resolve(__dirname, './routes/client')));
-
-  // Auth
-  app.use('/auth', require(path.resolve(__dirname, './routes/auth')));
-
-  // Enable user session
-  app.use(passport.authenticate(['indieauth', 'anonymous',]));
-
-  // Headers
-  app.use(function(req, res, next) {
-    res.links({
-      authorization_endpoint: config.site.authorizationEndpoint,
-      token_endpoint: config.site.tokenEndpoint,
-      micropub: config.site.micropubEndpoint,
-    });
-
-    return next();
-  });
-
-  // Routing
-  app.use('/notes', require(path.resolve(__dirname, './routes/notes')));
-  app.use('/', require(path.resolve(__dirname, './routes/home')));
-});
-
-db.on('error', function(err) {
+var cache = redis.createClient(config.redis.uri);
+cache.on('error', function(err) {
   logger.error(err);
 });
 
-process.on('SIGINT', function() {
-  db.close(function () {
-    logger.info('Connection to MongoDB closed.');
-    process.exit(0);
+cache.on('connect', function() {
+  logger.info('Established connection to Redis');
+  app.locals.redis.cache = cache;
+
+  // Clear cache
+  logger.debug('Clearing cache');
+  cache.flushdb();
+});
+
+// Database
+logger.info('Attempting to connect to MongoDB at ' + config.mongo.uri);
+var mongoClient = mongodb.MongoClient.connect(config.mongo.fulluri, {
+  promiseLibrary: Q.Promise,
+});
+app.locals.mongo.client = mongoClient;
+
+var Note = require('./models/note');
+
+Note.initialize({ drop: true, })
+  .then(function() {
+    return new Note({
+      name: 'Test Note 1',
+      content: {
+        'content-type': 'text/plain',
+        value: 'test',
+      },
+    })
+      .save();
+  })
+  .then(function(note) {
+    logger.debug('Saved test note', note);
   });
+
+
+// Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new IndieAuthStrategy({
+  clientId: config.site.url + '/',
+  redirectUri: config.site.redirectUri,
+  scopeDelimiter: ',', // for node-micropub-express
+  passReqToCallback: true,
+}, function(req, uid, token, profile, done) {
+  var user = {
+    uid: uid,
+    token: token,
+  };
+
+  // TODO: Save as Person, include uid, token, micropub endpoint in session
+
+  if (profile.name.formatted) {
+    user.name = profile.name.formatted;
+  }
+
+  if (profile.photos && profile.photos.length) {
+    user.photo = profile.photos[0].value;
+  }
+
+  if (profile._json.rels && profile._json.rels['micropub']) {
+    user.micropub = profile._json.rels['micropub'];
+  }
+
+  return done(null, user, {});
+}));
+passport.use(new AnonymousStrategy({}));
+
+passport.serializeUser(function(user, done) {
+  // TODO: Save as Person to db
+  return done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  // TODO Load Person from domain key
+  return done(null, user);
+});
+
+logger.info('Database and sessions initialized');
+
+// Views
+var viewsEnv = new nunjucks.Environment(
+  new nunjucks.FileSystemLoader('views', { noCache: true, }),
+  { autoescape: true, }
+);
+viewsEnv.addFilter('date', require('nunjucks-date-filter'));
+viewsEnv.express(app);
+
+// Webmention
+app.use('/webmention', require(path.resolve(__dirname, './routes/webmention')));
+
+// Micropub
+app.use('/micropub', require(path.resolve(__dirname, './routes/micropub')));
+
+// Client
+app.use('/client', require(path.resolve(__dirname, './routes/client')));
+
+// Auth
+app.use('/auth', require(path.resolve(__dirname, './routes/auth')));
+
+// Enable user session
+app.use(passport.authenticate(['indieauth', 'anonymous',]));
+
+// Headers
+app.use(function(req, res, next) {
+  res.links({
+    authorization_endpoint: config.site.authorizationEndpoint,
+    token_endpoint: config.site.tokenEndpoint,
+    micropub: config.site.micropubEndpoint,
+  });
+
+  return next();
+});
+
+// Routing
+app.use('/notes', require(path.resolve(__dirname, './routes/notes')));
+app.use('/', require(path.resolve(__dirname, './routes/home')));
+
+process.on('SIGINT', function() {
+  cache.quit();
+  logger.info('Connection to Redis closed.');
+
+  // TODO: check close method
+  app.locals.mongo.client.close()
+    .then(function () {
+      logger.info('Connection to MongoDB closed.');
+      process.exit(0);
+    });
 });

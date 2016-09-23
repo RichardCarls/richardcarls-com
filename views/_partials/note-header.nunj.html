@@ -1,0 +1,24 @@
+{% import '../_macros.nunj.html' as macros %}
+
+<header>
+  <!-- Explicit Name -->
+  {% if note.name %}
+  <h1 class="p-name">{{ note.name }}</h1>
+  {% endif %}
+
+  <!-- Reply Context -->
+  {% if note.replyContext %}
+  <aside>
+    <p>{{ macros.replyActionText(note.targetProperty) }}</p>
+    <ul>
+      {% for context in note.replyContext %}
+      <li>
+        <article class="p-{{ note.targetProperty }} h-cite">
+          {% include './note-context.nunj.html' %}
+        </article>
+      </li>
+      {% endfor %}
+    </ul>
+  </aside>
+  {% endif %}
+</header>

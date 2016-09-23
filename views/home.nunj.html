@@ -1,0 +1,49 @@
+{% extends './page.nunj.html' %}
+{% set me = site.me %}
+
+{% block title %}{{ super() }} | Home{% endblock %}
+
+{% block main %}
+<!-- Intro / Representative h-card -->
+<article class="h-card">
+  <img class="u-photo"
+       src="{{ me.photo }}"
+       alt="Profile photo of {{ me.name }}" />
+
+  <!-- TODO: Load configured h-card template -->
+  <h1>About Rick</h1>
+  <p><span class="p-name"><span class="p-given-name">{{ me['given-name'] }}</span> <span class="p-family-name">{{ me['family-name'] }}</span></span> is a <span class="p-job-title">{{ me['job-title'] }}</span> at <a class="u-org" href="{{ me.org.url }}">{{ me.org.name }}</a>, living in <span class="p-locality">{{ me.locality }}</span>, <span class="p-region">{{ me.region }}</span>, <spanr class="p-country-name">{{ me['country-name'] }}</span>.</p>
+
+  <section>
+    <h2>Around the Web</h2>
+    <ul>
+      {% for url in me.url %}
+      <li>
+        <a rel="me" class="u-url {{ 'u-uid' if loop.first }}"
+           href="{{ url }}">{{ url }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</article>
+
+<!-- Recent Notes -->
+<section class="h-feed">
+  <h1 class="p-name">Recent Notes</h1>
+  {% if recentNotes %}
+  <ol>
+    {% for note in recentNotes %}
+    <li>
+      <article class="h-entry">
+        {% include './_partials/note-header.nunj.html' %}
+        {% include './_partials/note-content.nunj.html' %}
+        {% include './_partials/note-footer.nunj.html' %}
+      </article>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p>No recent notes.</p>
+  {% endif %}
+</section>
+{% endblock %}

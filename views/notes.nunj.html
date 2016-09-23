@@ -1,0 +1,24 @@
+{% extends './page.nunj.html' %}
+
+{% block title %}{{ super() }} | Notes{% endblock %}
+
+{% block mainclass %}h-feed{% endblock %}
+
+{% block main %}
+<h1>Notes</h1>
+{% if notes %}
+<ol>
+  {% for note in notes %}
+  <li>
+    <article class="h-entry">
+      {% include './_partials/note-header.nunj.html' %}
+      {% include './_partials/note-content.nunj.html' %}
+      {% include './_partials/note-footer.nunj.html' %}
+    </article>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>No notes.</p>
+{% endif %}
+{% endblock %}

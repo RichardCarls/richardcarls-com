@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% set me = site.me %}
+
 <html>
   <head>
     <meta charset="utf-8" />
@@ -6,45 +8,79 @@
     <meta name="HandheldFriendly" content="True" />
     <meta name="MobileOptimized" content="240" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    
-    <title>{% block title %}Richard Carls{% endblock %}</title>
 
+    <title>{% block title %}{{ site.name }}{% endblock %}</title>
+
+    {% include '_partials/head-meta.nunj.html' %}
+
+    <!-- Social Media Profiles (for RelMeAuth) -->
+    {% for url in me.url %}
+    <link rel="me" href="{{ url }}" />
+    {% endfor %}
+
+    <!-- Authorization Endpoints -->
+    <link rel="authorization_endpoint"
+          href="{{ site.authorizationEndpoint }}" />
+    <link rel="token_endpoint"
+          href="{{ site.tokenEndpoint }}" />
+    <link rel="redirecturi"
+          href="{{ site.redirect_uri }}" />
+    <!-- TODO: Test openid auth -->
+    <link rel="openid.delegate"
+          href="{{ site.url }}" />
+    <link rel="openid.server"
+          href="{{ site.openidServer }}" />
+
+    <!-- Micropub Endpoints -->
+    <link rel="micropub"
+          href="{{ site.micropubEndpoint }}" />
+    <!-- TODO: Media Endpoint -->
+
+    <!-- Webmention Endpoint -->
+    <link rel="webmention"
+          href="{{ site.webmentionEndpoint }}" />
+
+    <!-- TODO: Load stylesheet(s) here -->
     <link rel="stylesheet"
           type="text/css"
           media="screen"
-          href="/assets/css/richardcarls.css" />
-    
-    <!-- RelMeAuth Profiles -->
-    {% for profile in locals.me.profiles %}
-    <link rel="me" href="{{ profile.url }}" />
-    {% endfor %}
+          href="/assets/css/main.css" />
+    {% block styles %}{% endblock %}
 
-    <!-- Endpoints -->
-    <link rel="authorization_endpoint" href="{{ locals.site.authorizationEndpoint }}" />
-    <link rel="token_endpoint" href="{{ locals.site.tokenEndpoint }}" />
-    <link rel="micropub" href="{{ locals.site.micropubEndpoint }}" />
-    <link rel="webmention" href="{{ site.webmentionEndpoint }}" />
-
-    <link rel="openid.delegate" href="{{ locals.site.url }}" />
-    <link rel="openid.server" href="https://indieauth.com/openid" />
+    <!-- TODO: Load script(s) here -->
+    {% block headscripts %}{% endblock %}
   </head>
   <body>
-    {% block sidebar %}
-    <header class="site-sidebar">
-      {% include 'includes/sidebar.nunj.html' %}
-    </header>
-    {% endblock %}
     
-    <main class="site-main {% block contentclass %}{% endblock %}">
-      {% include 'includes/dashboard.nunj.html' %}
-      
-      <header class="page-header">
-        {% block header %}
-        {% endblock %}
-      </header>
-      
-      {% block content %}
-      {% endblock %}
+    <!-- Site Banner -->
+    <header role="banner">
+      <h1>{{ site.name }}</h1>
+
+      <!-- Site Navigation -->
+      <nav>
+        <ol>
+          {% for page in site.pages %}
+          <li><a {% if page.rel %}rel="{{ page.rel }}"{% endif %}
+                 href="{{ page.path }}">{{ page.name }}</a></li>
+          {% endfor %}
+        </ol>
+      </nav>
+    </header>
+
+    <main class="{% block mainclass %}{% endblock %}">
+      {% block main %}{% endblock %}
     </main>
+
+    <footer role="contentinfo">
+      {% if user %}
+      <p>You are currently logged in as <code>{{ user.uid }}</code>.
+        <a href="/auth/logout">Log out</a>.</p>
+      {% else %}
+      <p><a href="/auth/login">Log in</a></p>
+      {% endif %}
+      <p>&copy; 2016 Richard Carls</p>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
   </body>
 </html>

@@ -1,0 +1,16 @@
+{% import '../_macros.nunj.html' as macros %}
+
+<header>
+  <cite>{{ macros.contextSubject(context) }}</cite>
+</header>
+
+<blockquote>{{ context.content.value }}</blockquote>
+
+<footer>
+  <dl>
+    <dt>Published</dt>
+    <dd><time class="dt-published" datetime="{{ context.published | date }}">{{ context.published | date }}</time></dd>
+    <dt>Cached</dt>
+    <dd><time class="dt-accessed" datetime="{{ context.accessed | date }}">{{ context.accessed | date }}</time></dd>
+  </dl>
+</footer>
