@@ -1,44 +1,120 @@
-var logger = require('../lib/logger');
+/**
+ * @module NoteContext
+ */
+
 var _ = require('lodash');
-var mongoose = require('mongoose');
+var Q = require('q');
+var moment = require('moment');
+var flat = require('flat');
+var logger = require('../lib/logger');
+var indieutil = require('@rcarls/indieutil');
 
-var noteContextSchema = new mongoose.Schema({
-  _id: { type: String, },
-  _content: { type: String, },
+var app = require('../app');
+
+
+var omitPropsList = [];
+
+/**
+ * Virtual and computed properties
+ * 
+ * @private
+ */
+var virtualDefs = {
+  type: {
+    value: 'cite',
+    enumerable: true,
+  },
+};
+
+
+/**
+ * @member {String[]} postTypes - Array of post types describing the
+ * source note
+ */
+
+
+/**
+ * NoteContext model
+ * 
+ * @constructor
+ * @param {Object} [properties] - The properties object. Properties can be
+ * an existing document, MF2, or JF2.
+ */
+function NoteContext(properties) {
+  _.assign(this, properties);
+
+  // Convert dates to ISO8601
+  if (this.published) {
+    this.published = moment(this.published).toISOString();
+  }
+  if (this.accessed) {
+    this.accessed = moment(this.accessed).toISOString();
+  }
+}
+
+module.exports = NoteContext;
+
+
+/**
+ * Returns a simple properties object suitable for storing in the database.
+ * 
+ * @instance
+ * @returns {Object} - The simpified properties object
+ */
+NoteContext.prototype.toDoc = function() {
+  var doc = _.omit(this, omitPropsList);
+
+  // convert dates to Unix timestamps
+  if (doc.published) {
+    doc.published = moment(doc.published).unix();
+  }
+  if (doc.accessed) {
+    doc.accessed = moment(doc.accessed).unix();
+  }
   
-  name: { type: String, },
-  uid: { type: String, },
-  published: { type: Date, required: true, index: true, },
-  accessed: { type: Date, required: true, default: Date.now(), },
-  publication: { type: String, },
+  return doc;
+};
 
-  author: { type: String, ref: 'Person', },
-}, {
-  toObject: { virtuals: true, },
-  toJSON: {virtuals: true, },
-});
 
-noteContextSchema.virtual('type')
-  .get(function() {
-    return 'cite';
-  });
+/**
+ * Validates the NoteContext properties, and applies transforms
+ * 
+ * @instance
+ * @param {validateCallback} [callback] - The validate callback
+ * @returns {Promise<Error, Boolean>} - Promise for the validation result
+ */
+NoteContext.prototype.validate = function(callback) {
 
-noteContextSchema.virtual('url')
-  .get(function() {
-    return this._id;
-  });
+  /**
+   * @callback validateCallback
+   * @param {Error|null} err - The Error object
+   * @param {Boolean|null} isValid - The validation result
+   */
 
-noteContextSchema.virtual('content')
-  .get(function() {
-    return {
-      'content-type': 'text/plain',
-      value: this._content,
-    };
-  })
-  .set(function(value) {
-    if (!Array.isArray(value)) { value = [value]; }
-    
-    this._content = _.find(value, { 'content-type': 'text/plain', }).value;
-  });
+  // TODO: Make synchonous ...
+  var deferred = Q.defer();
 
-module.exports = mongoose.model('NoteContext', noteContextSchema);
+  deferred.resolve(true);
+  
+  if (!this.author) {
+    deferred.reject(new TypeError('`author` is a required property.'));
+  }
+
+  if (!this.author.name) {
+    deferred.reject(new TypeError('`author.name` is a required property.'));
+  }
+
+  if (!this.author.url) {
+    deferred.reject(new TypeError('`author.url` is a required property.'));
+  }
+  
+  if (!this.published) {
+    deferred.reject(new TypeError('`published` is a required property.'));
+  }
+  
+  if (!this.accessed) {
+    deferred.reject(new TypeError('`accessed` is a required property.'));
+  }
+
+  return deferred.promise.nodeify(callback);
+};

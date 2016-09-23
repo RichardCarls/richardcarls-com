@@ -3,12 +3,13 @@ var express = require('express');
 var morgan = require('morgan');
 var helmet = require('helmet');
 var cors = require('cors');
+var Q = require('q');
 var passport = require('passport');
 var IndieAuthStrategy = require('@rcarls/passport-indieauth');
 var AnonymousStrategy = require('passport-anonymous');
 var cookieSession = require('cookie-session');
-var mongoose = require('mongoose');
-var autoIncrement = require('mongoose-auto-increment');
+var mongodb = require('mongodb');
+var redis = require('redis');
 var nunjucks = require('nunjucks');
 
 var logger = require(path.resolve(__dirname, 'lib/logger'));

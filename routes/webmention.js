@@ -1,45 +1,52 @@
 var path = require('path');
 var logger = require(path.resolve(__dirname, '../lib/logger'));
-var router = require('express').Router(); // eslint-disable-line new-cap
-var bodyParser = require('body-parser');
 var _ = require('lodash');
 var Q = require('q');
+
+var router = require('express').Router(); // eslint-disable-line new-cap
 var throwjs = require('throw.js');
-var webmentions = require('webmentions');
+
+var webmention = require('@rcarls/connect-webmention');
 var indieutil = require('@rcarls/indieutil');
-var moment = require('moment');
+var app = require(path.resolve(__dirname, '../app'));
 var Note = require('../models/note');
 var NoteContext = require('../models/note-context');
-var Person = require('../models/person');
 
-var app = require(path.resolve(__dirname, '../app'));
+router.post('/', webmention.receive(), function(req, res) {
+  if (req.webmention.error) {
+    logger.warn(req.webmention.error);
+    return res.status(req.webmention.error.status || 500)
+      .send(req.webmention.error.message);
+  }
+  
+  var jf2 = indieutil.toJf2(
+    indieutil.entryToCite(req.webmention.data), {
+      preferredContentType: 'text/plain',
+      implicitContentType: false,
+      compact: false,
+      references: false,
+    });
 
-router.post('/', bodyParser.urlencoded({ extended: false, }), function(req, res) {
-  return Q.ninvoke(webmentions, 'validateMention', {
-    source: req.body.source,
-    target: req.body.target,
-  })
-    .then(function(data) {
-      if (!data) {
-        throw new throwjs.badRequest('Problem parsing Microformats');
-      }
+  var response = new NoteContext(jf2);
 
-      if (!data.isValid) {
-        throw new throwjs.badRequest('Source does not link to target');
-      }
+  // Set url if not parsed
+  response.url = response.url || [req.webmention.source];
 
-      if (!data.source.entry.properties.author) {
-        throw new throwjs.badRequest('Missing authorship information.');
-      }
+  // Set post types of source
+  response.postTypes = indieutil
+    .determinePostTypes(req.webmention.data);
 
-      return Note.findByUrl(data.target.url).exec();
-    })
+  // Set accessed date
+  response.accessed = new Date();
+  
+  Note.findOneByUrl(req.webmention.target)
     .then(function(note) {
       if (!note) {
         throw new throwjs.badRequest('Target could not be found.');
       }
 
-      note.comment.push(req.body.source);
+      note.responses = note.responses || [];
+      note.responses.push(response);
       
       return note.save();
     })
@@ -48,13 +55,15 @@ router.post('/', bodyParser.urlencoded({ extended: false, }), function(req, res)
         throw new throwjs.internalServerError('Problem updating target.');
       }
 
-      logger.info('Saved new response from ' + req.body.source);
+      logger.info('Saved new ' + response.postTypes[0]
+                  + ' response from ' + req.webmention.source);
       
       return res.status(201).send();
     })
     .catch(function(err) {
+      // TODO: Find rep. h-card if not enough author info (name + url)
       logger.warn(err);
-
+      
       return res.status(err.statusCode || 500).send();
     });
 });
