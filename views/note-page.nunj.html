@@ -2,7 +2,7 @@
 
 {% block title %}{{ super() }} | {{ note.name or 'Untitled Note' }}{% endblock %}
 
-{% block mainclass %}h-entry{% endblock %}
+{% block mainclass %}post h-entry{% endblock %}
 
 {% block main %}
 {% include './_partials/note-header.nunj.html' %}
@@ -13,11 +13,13 @@
 {% if note.responses %}
 <aside>
   <h3>Responses</h3>
-  <ol>
+  <ol class="list list--unstyled">
     {% for context in note.responses %}
     <li>
-      {% set targetProperty = 'p-comment' %}
-      {% include './_partials/note-context.nunj.html' %}
+      <article class="note-context p-comment h-cite">
+        {% set targetProperty = 'p-comment' %}
+        {% include './_partials/note-context.nunj.html' %}
+      </article>
     </li>
     {% endfor %}
   </ol>

@@ -1,5 +1,3 @@
 {% if note.content %}
-<div class="e-content {{ 'p-name' if not note.name }}">
-  {{ note.content.value }}
-</div>
+<div class="content e-content {{ 'p-name' if not note.name }}">{{ note.content.value }}</div>
 {% endif %}

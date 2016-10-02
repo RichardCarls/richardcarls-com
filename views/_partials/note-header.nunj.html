@@ -10,10 +10,10 @@
   {% if note.replyContext %}
   <aside>
     <p>{{ macros.replyActionText(note.targetProperty) }}</p>
-    <ul>
+    <ul class="list list--unstyled">
       {% for context in note.replyContext %}
       <li>
-        <article class="p-{{ note.targetProperty }} h-cite">
+        <article class="note-context p-{{ note.targetProperty }} h-cite">
           {% include './note-context.nunj.html' %}
         </article>
       </li>

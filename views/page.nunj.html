@@ -44,43 +44,53 @@
     <link rel="stylesheet"
           type="text/css"
           media="screen"
-          href="/assets/css/main.css" />
+          href="/assets/css/styles.css" />
     {% block styles %}{% endblock %}
 
     <!-- TODO: Load script(s) here -->
     {% block headscripts %}{% endblock %}
   </head>
   <body>
-    
-    <!-- Site Banner -->
-    <header role="banner">
-      <h1>{{ site.name }}</h1>
+    <div class="site-wrap">
+      
+      <!-- Site Banner -->
+      <header class="site-header" role="banner">
+        <div class="tile-layout">
 
-      <!-- Site Navigation -->
-      <nav>
-        <ol>
-          {% for page in site.pages %}
-          <li><a {% if page.rel %}rel="{{ page.rel }}"{% endif %}
-                 href="{{ page.path }}">{{ page.name }}</a></li>
-          {% endfor %}
-        </ol>
-      </nav>
-    </header>
+          <!-- Site Name -->
+          <div class="tile tile--40">
+            <h1 class="site-name">{{ site.name }}</h1>
+          </div>
 
-    <main class="{% block mainclass %}{% endblock %}">
-      {% block main %}{% endblock %}
-    </main>
+          <!-- Site Navigation -->
+          <nav class="tile tile--60">
+            <ol class="site-nav">
+              {% for page in site.pages %}
+              <li><a {% if page.rel %}rel="{{ page.rel }}"{% endif %}
+                     href="{{ page.path }}">{{ page.name }}</a></li>
+              {% endfor %}
+            </ol>
+          </nav>
+          
+        </div>
+      </header>
 
-    <footer role="contentinfo">
-      {% if user %}
-      <p>You are currently logged in as <code>{{ user.uid }}</code>.
-        <a href="/auth/logout">Log out</a>.</p>
-      {% else %}
-      <p><a href="/auth/login">Log in</a></p>
-      {% endif %}
-      <p>&copy; 2016 Richard Carls</p>
-    </footer>
-    
+      <main class="site-main {% block mainclass %}{% endblock %}">
+        {% block main %}{% endblock %}
+      </main>
+
+      <footer class="site-footer" role="contentinfo">
+        {% if user %}
+        <p>You are currently logged in as <code>{{ user.uid }}</code>.
+          <a href="/auth/logout">Log out</a>.</p>
+        {% else %}
+        <p><a href="/auth/login">Log in</a></p>
+        {% endif %}
+        <p>&copy; 2016 Richard Carls</p>
+      </footer>
+      
+    </div>
+
     {% block scripts %}{% endblock %}
   </body>
 </html>

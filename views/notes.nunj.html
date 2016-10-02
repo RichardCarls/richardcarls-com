@@ -5,12 +5,12 @@
 {% block mainclass %}h-feed{% endblock %}
 
 {% block main %}
-<h1>Notes</h1>
+<h1 class="p-name">Notes</h1>
 {% if notes %}
-<ol>
+<ol class="list list--posts">
   {% for note in notes %}
   <li>
-    <article class="h-entry">
+    <article class="post p-entry h-entry">
       {% include './_partials/note-header.nunj.html' %}
       {% include './_partials/note-content.nunj.html' %}
       {% include './_partials/note-footer.nunj.html' %}

@@ -1,13 +1,13 @@
 {% import '../_macros.nunj.html' as macros %}
 
 <header>
-  <cite>{{ macros.contextSubject(context) }}</cite>
+  <cite class="inline-card p-author h-card">{{ macros.contextSubject(context) }}</cite>
 </header>
 
-<blockquote>{{ context.content.value }}</blockquote>
+<blockquote class="e-content">{{ context.content.value }}</blockquote>
 
 <footer>
-  <dl>
+  <dl class="metadata">
     <dt>Published</dt>
     <dd><time class="dt-published" datetime="{{ context.published | date }}">{{ context.published | date }}</time></dd>
     <dt>Cached</dt>
