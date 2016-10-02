@@ -5,9 +5,10 @@ var app = require(path.resolve(__dirname, '../app'));
 var logger = require(path.resolve(__dirname, '../lib/logger.js'));
 
 router.get('/', function(req, res) {
-  return res.render('home/home.nunj.html', {
-    locals: app.locals,
+  return res.render('home.nunj.html', {
+    site: app.locals.site,
     user: req.user,
+    // TODO: Recent Notes
   });
 });
 

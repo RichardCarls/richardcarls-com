@@ -18,8 +18,8 @@ router.all('/', passport.authenticate(['indieauth',], {
 router.get('/login',
            passport.authenticate(['indieauth', 'anonymous',]),
            function(req, res) {
-             return res.render('auth/login.nunj.html', {
-               locals: app.locals,
+             return res.render('login-page.nunj.html', {
+               site: app.locals.site,
                user: req.user,
                _csrf: req.csrfToken(),
              });

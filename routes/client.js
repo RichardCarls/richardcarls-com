@@ -13,8 +13,8 @@ router.use(csurf());
 
 router.get('/', function(req, res) {
 
-  return res.render('client/client.nunj.html', {
-    locals: app.locals,
+  return res.render('client.nunj.html', {
+    site: app.locals.site,
     user: req.user,
     _csrf: req.csrfToken(),
   });
@@ -22,8 +22,6 @@ router.get('/', function(req, res) {
 });
 
 router.post('/post', function(req, res, next) {
-  //logger.debug('client received', req.body);
-  
   var endpoint = req.body.endpoint;
   delete req.body.endpoint;
 
@@ -32,15 +30,18 @@ router.post('/post', function(req, res, next) {
     .split(/[\s,]+/);
   
   delete req.body._csrf;
-
+  
   // Post to user's micropub endpoint
-  request.post(req.user.micropub[0], {
+  request.post(endpoint, {
     auth: {
       bearer: req.user.token,
     },
     form: req.body,
   }, function(err, response, body) {
-    if (err) { return next(err); }
+    if (err) {
+      logger.error(err);
+      return next(err);
+    }
 
     if (response.statusCode !== 201) {
       return res.redirect(req.baseUrl + '#failed');
