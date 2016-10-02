@@ -1,0 +1,13 @@
+{
+  "local-plugins": true,
+  "use": ["postcss-import", "autoprefixer"],
+  "input": "./css/main.css",
+  "output": "./public_http/assets/css/styles.css",
+  "autoprefixer": {
+    "browsers": [
+      "ie >= 9",
+      "android >= 3",
+      "> 5%"
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+@charset "UTF-8";
+
+html {
+  /* Use border-box for sanity */
+  box-sizing: border-box;
+
+  /* Fill viewport */
+  min-height: 100%;
+}
+*,
+*:before,
+*:after { /* Inherit box-sizing */
+  box-sizing: inherit;
+}
+
+body {
+  position: relative;
+  height: 100%;
+  color: #2e2e2e;
+  font-family: 'DejaVu Serif', 'Roboto Serif', 'Palatino', serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Fira Sans', 'Roboto', 'Arial', sans-serif;
+  font-weight: normal;
+}
+
+p,
+ol,
+ul,
+dl {
+  margin: 1em 0;
+}
+
+img { /* Style alt text */
+  color: #000000;
+  background-color: #cccccc;
+  font-style: italic;
+  font-size: 0.6em;
+}

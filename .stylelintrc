@@ -1,0 +1,14 @@
+rules:
+  indentation: 2
+  max-line-length: 80
+  no-extra-semicolons: true
+  no-invalid-double-slash-comments: true
+  
+  color-hex-case: lower
+  color-hex-length: long
+  color-named: never
+
+  number-leading-zero: always
+  length-zero-no-unit: true
+
+  shorthand-property-no-redundant-values: true

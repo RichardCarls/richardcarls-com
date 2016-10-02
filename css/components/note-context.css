@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+.note-context {
+  margin: 0 -0.8em;
+  padding-left: 0.6em;
+  padding-right: 0.8em;
+  border-left: 0.2em solid #2e2e2e;
+}
+.note-context > header {
+  font-size: 0.8em;
+}
+.note-context > header > cite {
+  font-style: normal;
+}
+.note-context > blockquote {
+  margin-left: 0;
+  margin-right: 0;
+  white-space: pre-line;
+}

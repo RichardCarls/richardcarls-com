@@ -1,0 +1,43 @@
+@charset "UTF-8";
+
+/* General */
+@import "normalize-css/normalize.css";
+@import "global.css";
+
+/* Tools */
+@import "tools/helpers.css";
+@import "tools/tile-layout.css";
+
+/* Components */
+@import "components/site-header.css";
+@import "components/post.css";
+@import "components/note-context.css";
+@import "components/metadata.css";
+@import "components/inline-card.css";
+
+/**
+ * Layout Blocks
+ */
+.site-wrap {
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.site-main { /* Layout block padding */
+  padding: 1.5em 1em;
+}
+
+.site-footer {
+  padding: 1.5em 1em;
+  border-top: 1px solid #d2d2d2;
+}
+
+@media screen and (min-width: 40.063em) {  
+  .site-main {
+    padding: 1.5em 2em;
+  }
+
+  .site-footer {
+    padding: 1.5em 2em;
+  }
+}

@@ -1,0 +1,26 @@
+@charset "UTF-8";
+
+.metadata {
+  font-size: 0.8em;
+}
+.metadata > dt {
+  display: inline;
+  font-weight: bold;
+  vertical-align: top;
+}
+.metadata > dt:before {
+  content: "\A";
+  white-space: pre-line;
+}
+.metadata > dt:after {
+  content: ":";
+}
+.metadata > dt:first-child:before {
+  content: "";
+}
+.metadata > dd {
+  display: inline-block;
+  margin-left: 0;
+  padding-left: 0;
+  vertical-align: top;
+}

@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+.list.list--posts {
+  margin-left: 0;
+  padding-left: 0;
+  list-style-type: none;
+}
+.list.list--posts > li {
+  margin: 3em 0;
+}
+.list.list--posts > li:after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.5em;
+  border-bottom: 1px dotted #e2e2e2;
+}
+.list.list--posts > li:last-child:after {
+  border-bottom: none;
+}
+
+.post .content {
+  font-size: 1.25em;
+  white-space: pre-line;
+}

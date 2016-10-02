@@ -1,0 +1,33 @@
+@charset "UTF-8";
+
+.site-header {
+  padding: 1.5em 1em; /* 24px 16px */
+  border-bottom: 1px solid #d2d2d2;
+}
+
+.site-name {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.site-nav {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  text-align: right;
+}
+.site-nav > li {
+  display: inline-block;
+}
+.site-nav a {
+  display: block;
+  padding: 0.25em 0.75em;
+  font-family: 'Fira Sans', 'Roboto', 'Arial', sans-serif;
+  text-decoration: underline;
+}
+
+@media screen and (min-width: 40.063em) {
+  .site-header {
+    padding: 1.5em 2em;
+  }
+}

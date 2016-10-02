@@ -1,0 +1,43 @@
+@charset "UTF-8";
+
+.tile-layout {
+  margin: -1rem;
+  font-size: 0;
+}
+
+.tile-layout > .tile {
+  display: inline-block;
+  padding: 1em;
+  width: 100%;
+  font-size: 1rem;
+  vertical-align: top;
+}
+
+@media screen and (min-width: 40.063em) {
+  /* Halves */
+  .tile-layout > .tile.tile--50 {
+    width: 50%;
+  }
+
+  /* Quarters */
+  .tile-layout > .tile.tile--25 {
+    width: 25%;
+  }
+  .tile-layout > .tile.tile--75 {
+    width: 75%;
+  }
+
+  /* Fifths */
+  .tile-layout > .tile.tile--20 {
+    width: 20%;
+  }
+  .tile-layout > .tile.tile--40 {
+    width: 40%;
+  }
+  .tile-layout > .tile.tile--60 {
+    width: 60%;
+  }
+  .tile-layout > .tile.tile--80 {
+    width: 80%;
+  }
+}
