@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@rcarls/connect-webmention": "file:///projects/connect-webmention",
-    "@rcarls/indieutil": "file:///projects/node-indieutil",
+    "@rcarls/indieutil": "github:richardcarls/node-indieutil#develop",
     "@rcarls/passport-indieauth": "^2.0.1",
     "body-parser": "^1.15.1",
     "connect-micropub": "file:///projects/connect-micropub",
@@ -48,6 +48,7 @@
     "autoprefixer": "^6.5.0",
     "normalize.css": "^4.2.0",
     "postcss-cli": "^2.6.0",
+    "postcss-custom-properties": "^5.0.1",
     "postcss-import": "^8.1.2"
   }
 }

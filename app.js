@@ -131,6 +131,17 @@ var viewsEnv = new nunjucks.Environment(
   { autoescape: true, }
 );
 viewsEnv.addFilter('date', require('nunjucks-date-filter'));
+viewsEnv.addFilter('urlfilter', function(str) {
+  if (!str && str !== 0 && str !== false) {
+    return false;
+  }
+
+  str = str + '';
+
+  if(str.indexOf('javascript:') !== -1) {
+    return '#filtered';
+  }
+});
 viewsEnv.express(app);
 
 // Webmention

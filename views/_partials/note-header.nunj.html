@@ -13,7 +13,7 @@
     <ul class="list list--unstyled">
       {% for context in note.replyContext %}
       <li>
-        <article class="note-context p-{{ note.targetProperty }} h-cite">
+        <article class="note-context note-context--{{ context.postTypes[0] }}  p-{{ note.targetProperty }} h-cite">
           {% include './note-context.nunj.html' %}
         </article>
       </li>

@@ -15,7 +15,7 @@
   left: 0;
   right: 0;
   bottom: -1.5em;
-  border-bottom: 1px dotted #e2e2e2;
+  border-bottom: 1px dotted var(--color-lt-grey);
 }
 .list.list--posts > li:last-child:after {
   border-bottom: none;

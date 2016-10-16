@@ -4,7 +4,7 @@
   margin: 0 -0.8em;
   padding-left: 0.6em;
   padding-right: 0.8em;
-  border-left: 0.2em solid #2e2e2e;
+  border-left: 0.2em solid var(--color-black);
 }
 .note-context > header {
   font-size: 0.8em;

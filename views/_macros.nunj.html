@@ -4,7 +4,7 @@
 <img class="u-photo" src="{{ person.photo }}"
      alt="Profile photo of {{ person.name }}" />
 {% endif %}
-<a class="u-url" href="{{ person.url[0] }}"><span class="p-name">{{ person.name }}</span></a>
+<a class="u-uid u-url" href="{{ person.uid or person.url[0] | urlfilter }}"><span class="p-name">{{ person.name }}</span></a>
 <span class="domain">{{ person.url[0] }}</span>
 {% endmacro %}
 
@@ -23,11 +23,12 @@ Tagged
 {% endif %}
 {% endmacro %}
 
+<!-- Note context subject line -->
 {% macro contextSubject(context) %}
 {% if context.postTypes.indexOf('article') != -1 %}
 <a class="u-url" href="{{ context.url }}">{{ context.name }}</a>
 {% else %}
 A <a class="u-url" href="{{ context.url }}">{{ context.postTypes[0] }}</a>
 {% endif %}
-by {{ inlineCard(context.author) }}
+by <span class="inline-card p-author h-card">{{ inlineCard(context.author) }}</span>
 {% endmacro %}

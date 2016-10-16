@@ -1,10 +1,12 @@
 @charset "UTF-8";
 
 .metadata {
+  color: var(--color-dk-grey);
   font-size: 0.8em;
 }
 .metadata > dt {
   display: inline;
+  color: var(--color-black);
   font-weight: bold;
   vertical-align: top;
 }

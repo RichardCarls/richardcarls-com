@@ -12,32 +12,41 @@ var app = require(path.resolve(__dirname, '../app'));
 var Note = require('../models/note');
 var NoteContext = require('../models/note-context');
 
-router.post('/', webmention.receive(), function(req, res) {
+router.post('/', webmention.receive({
+  // TODO: implement these options in connect-webmention
+  jf2: {
+    preferredContentType: 'text/plain',
+    implicitContentType: false,
+    compact: false,
+    references: 'embed',
+  },
+  responseAs: 'cite',
+}), function(req, res) {
   if (req.webmention.error) {
     logger.warn(req.webmention.error);
+    
     return res.status(req.webmention.error.status || 500)
       .send(req.webmention.error.message);
   }
-  
-  var jf2 = indieutil.toJf2(
-    indieutil.entryToCite(req.webmention.data), {
-      preferredContentType: 'text/plain',
-      implicitContentType: false,
-      compact: false,
-      references: false,
-    });
 
-  var response = new NoteContext(jf2);
+  var response = new NoteContext(req.webmention.data);
 
   // Set url if not parsed
-  response.url = response.url || [req.webmention.source];
+  response.url = response.url || req.webmention.source;
 
   // Set post types of source
-  response.postTypes = indieutil
-    .determinePostTypes(req.webmention.data);
+  // TODO: Rename to responseTypes and store both type arrays
+  response.postTypes = req.webmention.responseTypes;
 
-  // Set accessed date
+  // Set accessed
   response.accessed = new Date();
+
+  // Remove implicit name
+  if (req.webmention.postTypes.indexOf('article') === -1) {
+    delete response.name;
+  }
+
+  logger.debug('response', response);
   
   Note.findOneByUrl(req.webmention.target)
     .then(function(note) {

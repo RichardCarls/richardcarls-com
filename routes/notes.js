@@ -25,7 +25,7 @@ router.get('/', function(req, res) {
 
 router.get('/:slug', function(req, res) {
   Note.findOne({ slug: req.params.slug, })
-    .then(function(note) {      
+    .then(function(note) {
       return res.render('note-page.nunj.html', {
         site: app.locals.site,
         user: req.user,

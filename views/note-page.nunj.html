@@ -16,7 +16,7 @@
   <ol class="list list--unstyled">
     {% for context in note.responses %}
     <li>
-      <article class="note-context p-comment h-cite">
+      <article class="note-context note-context--{{ context.postTypes[0] }} p-comment h-cite">
         {% set targetProperty = 'p-comment' %}
         {% include './_partials/note-context.nunj.html' %}
       </article>

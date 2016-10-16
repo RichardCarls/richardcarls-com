@@ -23,7 +23,11 @@ slugify.defaults.mode='rfc3986';
  * @private
  */
 var targetProperties = [
-  'in-reply-to', 'repost-of', 'like-of', 'bookmark-of', 'tag-of',
+  'in-reply-to',
+  'repost-of',
+  'like-of',
+  'bookmark-of',
+  'tag-of',
 ];
 
 /**
@@ -123,7 +127,7 @@ function Note(doc) {
 
   // Cast note contexts
   targetProperties.forEach(function(prop) {
-    if (this[prop]) {
+    if (this[prop] && Array.isArray(this[prop])) {
       this[prop] = this[prop].map(function(context) {
         return new NoteContext(context);
       });
@@ -504,25 +508,7 @@ function getUrl() {
  * @returns {String[]} - The set of mention targets
  */
 function getMentions() {
-  var note = this;
-
-  // TODO: Move into indieutil
-  var mentions = targetProperties.reduce(function(mentions, prop) {
-    if (!note[prop]) { return mentions; }
-
-    if (note[prop].length) {
-      mentions = mentions.concat(note[prop]);
-    } else {
-      // TODO: Target properties should all be arrays
-      mentions.push(note[prop]);
-    }
-
-    return mentions;
-  }, []);
-  
-  mentions = _.uniq(_.compact(mentions));
-  
-  return mentions;
+  return indieutil.determineMentionTargets(this);
 }
 
 

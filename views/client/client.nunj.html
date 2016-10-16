@@ -1,0 +1,163 @@
+{% extends '../page.nunj.html' %}
+
+{% block title %}{{ super() }} | Micropub Client {% endblock %}
+
+{% block main %}
+<h1>Micropub client</h1>
+
+<!-- 1. Authorizaion -->
+{% if not user %}
+<h2>Authoization</h2>
+<p>In order to use the Micropub client, you must first login with IndieAuth and authorize the <code>create</code> scope.</p>
+<form method="post" action="/auth">
+  <label for="me">Your site's URL</label>
+  <input type="url"
+         id="me"
+         name="me"
+         placeholder="http://your-site.com/" />
+
+  <fieldset>
+    <legend>Authorize scopes for <code>{{ site.url }}/</legend>
+      <input type="checkbox"
+             id="scope-create"
+             name="scope"
+             value="create" />
+      <label for="scope-create">Create</label>
+  </fieldset>
+
+  <input type="submit" value="Authorize" />
+
+  <input type="hidden"
+         name="_csrf"
+         value="{{ _csrf }}" />
+</form>
+{% else %}
+<div class="tile-layout">
+  <div class="tile tile--60">
+    {% if session.preferredEndpoint %}
+    <!-- 3. Response Type Selection -->
+    <h2>Response Type</h2>
+    <form method="post" action="/client/update/responseType">
+      <fieldset>
+        <legend>This note is a</legend>
+        {% for type in client.responseTypes %}
+        <input type="radio"
+               id="{{ type.value }}"
+               name="responseType"
+               value="{{ type.value }}"
+               {{ 'checked' if type.value == client.currentResponseType }}/>
+        <label for="{{ type.value }}">{{ type.name }}</label>
+        {% endfor %}
+      </fieldset>
+
+      <input type="submit"
+             value="Update" />
+
+      <input type="hidden"
+             name="_csrf"
+             value="{{ _csrf }}" />
+    </form>
+
+    <!-- Post -->
+    <form method="post"
+          action="/client/post">
+      <!-- Repsonse Targets -->
+      {% if client.currentResponseType %}
+      <fieldset>
+        <legend>Response Targets</legend>
+        {% for target in client.responseTargets %}
+        <input type="url"
+               name="{{ client.currentResponseType }}[]"
+               readonly="readonly"
+               value="target" />
+        {% endfor %}
+        <input type="url"
+               name="{{ client.currentResponseType }}[]"
+               placeholder="https://another-site.com/notes/1" />
+      </fieldset>
+      {% endif %}
+
+      <!-- name -->
+      <label for="name">Title</label>
+      <input type="text"
+             id="name"
+             name="name"
+             placeholder="Note Title" />
+
+      <!-- content -->
+      <label for="content">Content</label>
+      <textarea id="content"
+                name="content"
+                placeholder="lorem ipsum..."></textarea>
+
+      <!-- category -->
+      <!-- TODO: Autocomplete with user's ?q=config result -->
+      <label for="category">Tags</label>
+      <input type="text"
+             id="category"
+             name="category"
+             placeholder="Tag1, Tag2" />
+      
+      <input type="submit"
+             value="Post" />
+
+      <!-- type -->
+      <!-- TODO: Allow switching types (entry vs event, etc) -->
+      <input type="hidden"
+             name="h"
+             value="entry" />
+      
+      <input type="hidden"
+             name="_csrf"
+             value="{{ _csrf }}" />
+    </form>
+    {% else %}
+    <p>Select a Micropub endpoint to work with.</p>
+    {% endif %}
+  </div>
+
+  <div class="tile tile--40">
+    <!-- 2. Endpoint Selection -->
+    <h2>Micropub Endpoint</h2>
+    <form method="post" action="/client/update/endpoint">
+      <fieldset>
+        <legend>Select a Micropub endpoint</legend>
+        {% for endpoint in user.micropub %}
+        <input type="radio"
+               id="endpoint-{{ loop.index }}"
+               name="endpoint"
+               value="{{ endpoint }}"
+               required="required"
+               {{ 'checked' if endpoint == session.preferredEndpoint }}/>
+        <label for="endpoint-{{ loop.index }}">{{ endpoint }}</label><br />
+        {% endfor %}
+        <input type="radio"
+               id="endpoint-other"
+               name="endpoint"
+               value="other"
+               required="required" />
+        <label for="endpoint-other">Other:</label>
+        <input type="text"
+               name="endpoint-other" />
+      </fieldset>
+
+      <input type="submit"
+             value="Update" />
+
+      <input type="hidden"
+             name="_csrf"
+             value="{{ _csrf }}" />
+    </form>
+    {% if session.preferredEndpoint %}
+    <h3>Config</h3>
+    <p>This client supports the following <code>config</code> properties:</p>
+    <dl>
+      <dt>preview</dt>
+      <dd>An endpoint where the client can post to that will return an HTML preview of the post.</dd>
+    </dl>
+    <code><pre>{{ session.config | dump | safe }}</pre></code>
+    {% endif %}
+  </div>
+
+{% endif %}
+{% endblock %}

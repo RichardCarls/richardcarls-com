@@ -1,5 +1,16 @@
 @charset "UTF-8";
 
+:root {
+  --base-font-size: 16px;
+  --font-family-body: 'DejaVu Serif', 'Roboto Serif', 'Palatino', serif;
+  --font-family-headings: 'Fira Sans', 'Roboto', 'Arial', sans-serif;
+
+  --color-black: #2e2e2e;
+  --color-white: #ffffff;
+  --color-lt-grey: #e2e2e2;
+  --color-dk-grey: #d2d2d2;
+}
+
 html {
   /* Use border-box for sanity */
   box-sizing: border-box;
@@ -16,8 +27,9 @@ html {
 body {
   position: relative;
   height: 100%;
-  color: #2e2e2e;
-  font-family: 'DejaVu Serif', 'Roboto Serif', 'Palatino', serif;
+  color: var(--color-black);
+  font-size: var(--base-font-size);
+  font-family: var(--font-family-body);
 }
 
 h1,
@@ -26,7 +38,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Fira Sans', 'Roboto', 'Arial', sans-serif;
+  font-family: var(--font-family-headings);
   font-weight: normal;
 }
 

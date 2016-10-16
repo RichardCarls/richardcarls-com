@@ -1,6 +1,10 @@
 {
   "local-plugins": true,
-  "use": ["postcss-import", "autoprefixer"],
+  "use": [
+    "postcss-import",
+    "postcss-custom-properties",
+    "autoprefixer"
+  ],
   "input": "./css/main.css",
   "output": "./public_http/assets/css/styles.css",
   "autoprefixer": {

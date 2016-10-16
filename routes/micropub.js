@@ -50,71 +50,91 @@ passport.use(new BearerStrategy({}, function(token, done) {
 
 router.post('', [
   passport.authenticate('bearer', { session: false, }),
-  micropub.create()
+  micropub.create({
+    jf2: {
+      preferredContentType: 'text/plain',
+      implicitContentType: false,
+      compact: false,
+      references: false,
+    },
+  }),
 ], function(req, res) {
-  var jf2 = indieutil.toJf2(req.micropub, {
-    compact: false,
-    references: false,
-  });
-  
-  var fetchTasks = [];
-  // TODO: Fetch all response contexts
-  if (!_.isEmpty(jf2['in-reply-to'])) {
-    jf2['in-reply-to'].forEach(function(url) {
-      var task = indieutil.fetch(url)
-          .then(function(mfData) {
-            var entry = _.find(mfData.items, { type: ['h-entry'], });
-            
-            var jf2 = indieutil.toJf2(
-              indieutil.entryToCite(entry), {
-                preferredContentType: 'text/plain',
-                implicitContentType: false,
-                compact: false,
-                references: false,
-              });
-
-            // Determine target post type
-            jf2.postTypes = indieutil
-              .determinePostTypes(entry);
-            
-            // Set url if not present
-            jf2.url = jf2.url || [url];
-            
-            // Set accessed
-            jf2.accessed = new Date();
-
-            return jf2;
-          });
-
-      fetchTasks.push(task);
-    });
-  }
-
-  Q.all(fetchTasks)
-    .then(function(contexts) {
-      if (contexts.length) {
-        // TODO: Sort contexts into target props
-        jf2['in-reply-to'] = contexts;
-      }
-      
+  indieutil
+    .jf2FetchRefs(req.micropub, {
+      jf2: {
+        preferredContentType: 'text/plain',
+        implicitContentType: false,
+        compact: false,
+        references: 'embed',
+      },
+      embedReferences: true,
+      determinePostTypes: true,
+    })
+    .then(function(jf2) {
       logger.debug('Micropub JF2', jf2);
+
       return new Note(jf2).save();
     })
     .then(function(note) {
       logger.info('Created new ' + note.postTypes[0], note.url);
       
-      res.location(note.url).status(201).send();
-
+      res.location(note.url)
+        .status(201)
+        .send();
+      
       // Send webmentions
-      note.mentions.map(function(context) {
+      note.mentions.forEach(function(target) {
+        // TODO: develop indieutil solution
         webmentions.proxyMention({
           source: note.url,
-          target: context.url[0],
+          target: target,
         }, function(err, data) {
           if (err) { logger.warn(err); return; }
 
           logger.info(data.message);
         });
+      });
+    })
+    .catch(function(err) {
+      logger.error(err);
+      
+      return res.status(500).send();
+    });
+    
+});
+
+router.get('/', micropub.query({
+  config: {
+    preview: app.locals.site.url + '/micropub/preview',
+  },
+}));
+
+
+router.post('/preview', [
+  passport.authenticate('bearer', { session: false, }),
+  micropub.create({
+    jf2: {
+      preferredContentType: 'text/plain',
+      implicitContentType: false,
+      compact: false,
+      references: 'embed',
+    },
+  }),
+], function(req, res) {
+  indieutil
+    .jf2FetchRefs(req.micropub, {
+      jf2: {
+        preferredContentType: 'text/plain',
+        implicitContentType: false,
+        compact: false,
+        references: 'embed',
+      },
+      embedReferences: true,
+      determinePostTypes: true,
+    })
+    .then(function(jf2) {
+      return res.render('note-preview.nunj.html', {
+        note: new Note(jf2),
       });
     })
     .catch(function(err) {

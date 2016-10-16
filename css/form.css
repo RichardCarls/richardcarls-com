@@ -1,0 +1,62 @@
+@charset "UTF-8";
+
+input[type="text"],
+input[type="url"],
+select,
+textarea {
+  display: block;
+  margin: 0.25em 0;
+  padding: 0.25em 0.75em;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-dk-grey);
+  vertical-align: middle;
+}
+
+input[disabled],
+select[disabled],
+textarea[disabled] {
+  cursor: not-allowed;
+  background-color: var(--color-lt-grey);
+  color: var(--color-dk-grey);
+}
+
+input[readonly],
+select[readonly],
+textarea[readonly] {
+  border: none;
+}
+
+select {
+  border: 1px solid var(--color-dk-grey);
+  background-color: var(--color-white);
+}
+select[multiple] {
+  height: auto;
+}
+
+/* Other form elements */
+label {
+  margin: 0.25em 0;
+}
+fieldset {
+  margin: 0;
+  padding: 1em 0;
+  border: 0;
+}
+legend {
+  display: block;
+  width: 100%;
+  padding: 0.25em 0;
+  border-bottom: 1px solid var(--color-lt-grey);
+}
+
+/**
+ * Inline form
+ */
+form.inline input,
+form.inline select,
+form.inline label,
+form.inline textarea {
+  display: inline-block;
+  margin: 0;
+}
