@@ -6,16 +6,15 @@ var app = require(path.resolve(__dirname, '../app'));
 var logger = require(path.resolve(__dirname, '../lib/logger.js'));
 
 router.get('/', function(req, res) {
-  // TODO: Don't return _responses for list view
-  Note.find({}, {
-    sort: { published: -1, },
-    project: { responses: false, },
-  })
+  Note.find({})
+    .populateReplyContexts()
+    .sort({ published: -1, })
+    .exec()
     .then(function(notes) {
       return res.render('notes.nunj.html', {
         site: app.locals.site,
         user: req.user,
-        notes: notes,
+        notes: notes.map(function(note) { return note.toObject(); }),
       });
     })
     .catch(function(err) {
@@ -25,11 +24,19 @@ router.get('/', function(req, res) {
 
 router.get('/:slug', function(req, res) {
   Note.findOne({ slug: req.params.slug, })
+    .populateReplyContexts()
+    .populateComments({
+      sort: { published: -1, },
+      // limit, start
+    })
+    .exec()
     .then(function(note) {
+      logger.debug('note', note.toObject());
+      
       return res.render('note-page.nunj.html', {
         site: app.locals.site,
         user: req.user,
-        note: note,
+        note: note.toObject(),
       });
     })
     .catch(function(err) {

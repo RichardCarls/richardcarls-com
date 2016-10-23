@@ -1,120 +1,193 @@
-/**
- * @module NoteContext
- */
-
 var _ = require('lodash');
-var Q = require('q');
+var mongoose = require('mongoose');
 var moment = require('moment');
-var flat = require('flat');
-var logger = require('../lib/logger');
 var indieutil = require('@rcarls/indieutil');
 
-var app = require('../app');
-
-
-var omitPropsList = [];
 
 /**
- * Virtual and computed properties
+ * @module Note
+ */
+
+
+/**
+ * Set of valid original post types
  * 
  * @private
  */
-var virtualDefs = {
-  type: {
-    value: 'cite',
-    enumerable: true,
-  },
-};
-
-
-/**
- * @member {String[]} postTypes - Array of post types describing the
- * source note
- */
-
+var postTypes = [
+  'rsvp',
+  'reply',
+  'repost',
+  'like',
+  'bookmark',
+  'tag',
+  'article',
+  'note',
+];
 
 /**
- * NoteContext model
+ * Set of valid repsonse types for response contexts
  * 
- * @constructor
- * @param {Object} [properties] - The properties object. Properties can be
- * an existing document, MF2, or JF2.
+ * @private
  */
-function NoteContext(properties) {
-  _.assign(this, properties);
+var responseTypes = [
+  'rsvp',
+  'reply',
+  'repost',
+  'like',
+  'bookmark',
+  'tag',
+  'mention',
+];
 
-  // Convert dates to ISO8601
-  if (this.published) {
-    this.published = moment(this.published).toISOString();
+/**
+ * Mongoose schema for a NoteContext
+ * 
+ * @member {mongoose.Schema} schema
+ */
+var noteContextSchema = new mongoose.Schema({
+  _id: { type: String, },
+  
+  name: { type: String, },
+  content: { type: String, },
+  published: {
+    type: Date,
+    required: true,
+    validate: isValidDate,
+    get: getISO8601Date,
+  },
+  accessed: {
+    type: Date,
+    required: true,
+    validate: isValidDate,
+    get: getISO8601Date,
+  },
+
+  author: { type: String, ref: 'Person', required: true, },
+
+  photo: { type: [String], },
+
+  _postTypes: { type: [String], enum: postTypes, },
+  _responseTypes: { type: [String], enum: responseTypes, },
+}, {
+  autoIndex: false,
+  toJSON: { getters: true, },
+  toObject: { getters: true, transform: toJf2, },
+});
+
+noteContextSchema.index({ _id: 1, published: -1, });
+
+
+
+/**
+ * Format to JF2
+ * 
+ * @private
+ * @param {Object} doc - The Mongo document
+ * @param {Object} ret - The object being returned
+ * @param {Object} [options] - Any passed options object
+ * @param {Boolean} [options.keepUnderscored=true] - If `false`, will rmeove
+ * properties prefixed with an underscore. Default is `true`.
+ * @returns {Object} - The transformed return object
+ */
+function toJf2(doc, ret, options) {
+  options = options || {};
+  options.keepUnderscored = (options.keepUnderscored !== false);
+  
+  for (var key in ret) {
+    var value = ret[key];
+
+    // Remove empty properties
+    if (_.isEmpty(value)) {
+      delete ret[key];
+    }
+
+    if (!options.keepUnderscored && _.startsWith(key, '_')) {
+      delete ret[key];
+    }
   }
-  if (this.accessed) {
-    this.accessed = moment(this.accessed).toISOString();
-  }
+
+  // Remove ids
+  delete ret._id;
+  delete ret.id;
 }
 
-module.exports = NoteContext;
+
+/**
+ * Gets the note context type
+ * 
+ * @instance
+ * @returns {String} - The note type. Default is `'cite'`.
+ */
+noteContextSchema.virtual('type').get(function() {
+  return 'cite';
+});
 
 
 /**
- * Returns a simple properties object suitable for storing in the database.
+ * Gets the note context URL
  * 
  * @instance
- * @returns {Object} - The simpified properties object
+ * @returns {String} - The context URL
  */
-NoteContext.prototype.toDoc = function() {
-  var doc = _.omit(this, omitPropsList);
+noteContextSchema.virtual('url').get(function() {
+  return this._id;
+});
 
-  // convert dates to Unix timestamps
-  if (doc.published) {
-    doc.published = moment(doc.published).unix();
+
+/**
+ * Sets the note context URL
+ * 
+ * @instance
+ * @param {String} value - The context URL
+ */
+noteContextSchema.virtual('url').set(function(value) {
+  if (Array.isArray(value)) {
+    this._id = value[0];
+  } else {
+    this._id = value;
   }
-  if (doc.accessed) {
-    doc.accessed = moment(doc.accessed).unix();
-  }
-  
-  return doc;
+});
+
+
+/**
+ * Gets the note context uid URL
+ * 
+ * @instance
+ * @returns {String} - The context uid URL
+ */
+noteContextSchema.virtual('uid').get(function() {
+  return this._id;
+});
+
+
+/**
+ * Validation function for dates
+ * 
+ * @param {*} value - The value to test
+ * @returns {Boolean} - `true` if parseable into a valid date
+ */
+function isValidDate(value) {
+  return moment(value).isValid();
+}
+
+
+function isValidUrl(value) {
+  //return require('valid-url').isUri(value);
+  return true;
 };
 
 
 /**
- * Validates the NoteContext properties, and applies transforms
+ * Returns a date value as an ISO8601 datestring
  * 
- * @instance
- * @param {validateCallback} [callback] - The validate callback
- * @returns {Promise<Error, Boolean>} - Promise for the validation result
+ * @getter
+ * @param {Number} value - The document date value
+ * @returns {String} - The ISO8601 datestring
  */
-NoteContext.prototype.validate = function(callback) {
+function getISO8601Date(value) {
+  return moment(value).toISOString();
+}
 
-  /**
-   * @callback validateCallback
-   * @param {Error|null} err - The Error object
-   * @param {Boolean|null} isValid - The validation result
-   */
 
-  // TODO: Make synchonous ...
-  var deferred = Q.defer();
-
-  deferred.resolve(true);
-  
-  if (!this.author) {
-    deferred.reject(new TypeError('`author` is a required property.'));
-  }
-
-  if (!this.author.name) {
-    deferred.reject(new TypeError('`author.name` is a required property.'));
-  }
-
-  if (!this.author.url) {
-    deferred.reject(new TypeError('`author.url` is a required property.'));
-  }
-  
-  if (!this.published) {
-    deferred.reject(new TypeError('`published` is a required property.'));
-  }
-  
-  if (!this.accessed) {
-    deferred.reject(new TypeError('`accessed` is a required property.'));
-  }
-
-  return deferred.promise.nodeify(callback);
-};
+module.exports = mongoose.model('NoteContext', noteContextSchema);

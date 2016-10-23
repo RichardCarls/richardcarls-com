@@ -5,7 +5,7 @@
      alt="Profile photo of {{ person.name }}" />
 {% endif %}
 <a class="u-uid u-url" href="{{ person.uid or person.url[0] | urlfilter }}"><span class="p-name">{{ person.name }}</span></a>
-<span class="domain">{{ person.url[0] }}</span>
+<span class="domain">{{ person.uid or person.url[0] }}</span>
 {% endmacro %}
 
 <!-- Action text for reply context -->
@@ -25,10 +25,10 @@ Tagged
 
 <!-- Note context subject line -->
 {% macro contextSubject(context) %}
-{% if context.postTypes.indexOf('article') != -1 %}
+{% if context._postTypes.indexOf('article') != -1 %}
 <a class="u-url" href="{{ context.url }}">{{ context.name }}</a>
 {% else %}
-A <a class="u-url" href="{{ context.url }}">{{ context.postTypes[0] }}</a>
+A <a class="u-url" href="{{ context.url }}">{{ context._postTypes[0] }}</a>
 {% endif %}
 by <span class="inline-card p-author h-card">{{ inlineCard(context.author) }}</span>
 {% endmacro %}

@@ -7,13 +7,13 @@
   {% endif %}
 
   <!-- Reply Context -->
-  {% if note.replyContext %}
+  {% if note._replyContext %}
   <aside>
-    <p>{{ macros.replyActionText(note.targetProperty) }}</p>
+    <p>{{ macros.replyActionText(note._targetProperty) }}</p>
     <ul class="list list--unstyled">
-      {% for context in note.replyContext %}
+      {% for context in note._replyContext %}
       <li>
-        <article class="note-context note-context--{{ context.postTypes[0] }}  p-{{ note.targetProperty }} h-cite">
+        <article class="note-context note-context--{{ context._postTypes[0] }}  p-{{ note._targetProperty }} h-cite">
           {% include './note-context.nunj.html' %}
         </article>
       </li>

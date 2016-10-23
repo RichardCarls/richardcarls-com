@@ -13,6 +13,8 @@ var indieutil = require('@rcarls/indieutil');
 
 var app = require(path.resolve(__dirname, '../app'));
 var Note = require(path.resolve(__dirname, '../models/note'));
+var NoteContext = require('../models/note-context');
+var Person = require('../models/person');
 
 // TODO: Check error logging (logs the message object)
 passport.use(new BearerStrategy({}, function(token, done) {
@@ -63,27 +65,57 @@ router.post('', [
     .jf2FetchRefs(req.micropub, {
       jf2: {
         preferredContentType: 'text/plain',
-        implicitContentType: false,
+        implicitContentType: 'text/plain',
         compact: false,
-        references: 'embed',
       },
-      embedReferences: true,
       determinePostTypes: true,
     })
     .then(function(jf2) {
+
+      // TODO: Set published in middleware
+      jf2.published = new Date();
+
       logger.debug('Micropub JF2', jf2);
 
-      return new Note(jf2).save();
+      var saveTasks = Object.keys(jf2.references).map(function(url) {
+        var ref = jf2.references[url];
+
+        // TODO: Allow customizing postTypes key (to _postTypes)
+        ref._postTypes = _.clone(ref.postTypes);
+
+        if (ref.type === 'cite') {
+          return new NoteContext(ref).save();
+        }
+
+        if (ref.type === 'card') {
+          // TODO: Set uid in toJf2 or fetch
+          ref.uid = ref.uid || ref.url[0];
+          
+          return new Person(ref).save()
+            .then(function(person) {
+              logger.debug('Saved new person', person.toObject());
+            });
+        }
+
+        return null;
+      });
+
+      delete jf2.references;
+      
+      return Q.all([
+        new Note(jf2).save(),
+        Q.allSettled(saveTasks),
+      ]);
     })
-    .then(function(note) {
-      logger.info('Created new ' + note.postTypes[0], note.url);
+    .spread(function(note, refs) {
+      logger.info('Created new ' + note._postTypes[0], note.url);
       
       res.location(note.url)
         .status(201)
         .send();
       
       // Send webmentions
-      note.mentions.forEach(function(target) {
+      note._mentionTargets.forEach(function(target) {
         // TODO: develop indieutil solution
         webmentions.proxyMention({
           source: note.url,

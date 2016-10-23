@@ -10,13 +10,13 @@
 {% include './_partials/note-footer.nunj.html' %}
 
 <!-- Responses -->
-{% if note.responses %}
+{% if note.comment %}
 <aside>
   <h3>Responses</h3>
   <ol class="list list--unstyled">
-    {% for context in note.responses %}
+    {% for context in note.comment %}
     <li>
-      <article class="note-context note-context--{{ context.postTypes[0] }} p-comment h-cite">
+      <article class="note-context note-context--{{ context._postTypes[0] }} p-comment h-cite">
         {% set targetProperty = 'p-comment' %}
         {% include './_partials/note-context.nunj.html' %}
       </article>

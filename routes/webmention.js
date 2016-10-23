@@ -11,14 +11,14 @@ var indieutil = require('@rcarls/indieutil');
 var app = require(path.resolve(__dirname, '../app'));
 var Note = require('../models/note');
 var NoteContext = require('../models/note-context');
+var Person = require('../models/person');
 
 router.post('/', webmention.receive({
   // TODO: implement these options in connect-webmention
   jf2: {
     preferredContentType: 'text/plain',
-    implicitContentType: false,
+    implicitContentType: 'text/plain',
     compact: false,
-    references: 'embed',
   },
   responseAs: 'cite',
 }), function(req, res) {
@@ -29,33 +29,60 @@ router.post('/', webmention.receive({
       .send(req.webmention.error.message);
   }
 
-  var response = new NoteContext(req.webmention.data);
+  var jf2 = req.webmention.data;
 
   // Set url if not parsed
-  response.url = response.url || req.webmention.source;
+  jf2.url = jf2.url || req.webmention.source;
 
   // Set post types of source
   // TODO: Rename to responseTypes and store both type arrays
-  response.postTypes = req.webmention.responseTypes;
+  jf2._postTypes = req.webmention.postTypes;
+  jf2._responseTypes = req.webmention.responseTypes;
 
   // Set accessed
-  response.accessed = new Date();
+  jf2.accessed = new Date();
 
   // Remove implicit name
   if (req.webmention.postTypes.indexOf('article') === -1) {
-    delete response.name;
+    delete jf2.name;
   }
 
-  logger.debug('response', response);
-  
-  Note.findOneByUrl(req.webmention.target)
+  var saveTasks = Object.keys(jf2.references).map(function(url) {
+    var ref = jf2.references[url];
+
+    // Ignore embedded cites (comments and such)
+
+    if (ref.type === 'card') {
+      // TODO: Set uid in toJf2 or fetch
+      ref.uid = ref.uid || ref.url[0];
+      
+      return new Person(ref).save()
+        .then(function(person) {
+          logger.info('Saved new person: ' + person.name);
+        });
+    }
+
+    return null;
+  });
+
+  delete jf2.references;
+
+  return Q.all([
+    new NoteContext(jf2).save(),
+    Q.allSettled(saveTasks),
+  ])
+    .spread(function(response, refs) {
+      return Note
+        .find()
+        .byUrl(req.webmention.target)
+        .exec();
+    })
     .then(function(note) {
       if (!note) {
         throw new throwjs.badRequest('Target could not be found.');
       }
 
-      note.responses = note.responses || [];
-      note.responses.push(response);
+      note.comment.push(req.webmention.source);
       
       return note.save();
     })
@@ -64,7 +91,7 @@ router.post('/', webmention.receive({
         throw new throwjs.internalServerError('Problem updating target.');
       }
 
-      logger.info('Saved new ' + response.postTypes[0]
+      logger.info('Saved new ' + jf2._postTypes[0]
                   + ' response from ' + req.webmention.source);
       
       return res.status(201).send();

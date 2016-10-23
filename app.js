@@ -8,7 +8,7 @@ var passport = require('passport');
 var IndieAuthStrategy = require('@rcarls/passport-indieauth');
 var AnonymousStrategy = require('passport-anonymous');
 var cookieSession = require('cookie-session');
-var mongodb = require('mongodb');
+var mongoose = require('mongoose');
 var redis = require('redis');
 var nunjucks = require('nunjucks');
 
@@ -57,27 +57,61 @@ cache.on('connect', function() {
 
 // Database
 logger.info('Attempting to connect to MongoDB at ' + config.mongo.uri);
-var mongoClient = mongodb.MongoClient.connect(config.mongo.fulluri, {
+mongoose.Promise = Q.Promise;
+mongoose.connect(config.mongo.fulluri, {
   promiseLibrary: Q.Promise,
 });
-app.locals.mongo.client = mongoClient;
 
-var Note = require('./models/note');
+var db = mongoose.connection;
+app.locals.mongo.db = db;
 
-Note.initialize({ drop: true, })
-  .then(function() {
-    return new Note({
-      name: 'Test Note 1',
-      content: {
-        'content-type': 'text/plain',
-        value: 'test',
-      },
-    })
-      .save();
-  })
-  .then(function(note) {
-    logger.debug('Saved test note', note);
+db.on('error', function(err) {
+  logger.error(err);
+});
+
+db.on('open', function() {
+  var Note = require('./models/note');
+  var NoteContext = require('./models/note-context');
+  var Person = require('./models/person');
+  
+  logger.info('Database connection open');
+
+  // Drop collections
+  var cols = Object.keys(db.collections);
+
+  var dropTasks = cols.map(function(col) {
+    return db.collections[col].drop()
+      .catch(function(err) {
+        if (err.message !== 'ns not found') {
+          logger.error(err);
+        }
+      });
   });
+  
+  Q.all(dropTasks)
+    .then(function() {
+      logger.debug('Dropped collections');
+
+      var testNote = new Note({
+        name: 'Test Note',
+        slug: 'test-note',
+        content: {
+          'content-type': 'text/plain',
+          value: 'Lorem ipsum dolar sit amet.',
+        },
+        published: new Date(),
+        category: ['Test'],
+      });
+
+      return testNote.save();
+    })
+    .then(function(note) {
+      logger.debug('saved test note', note.toObject());
+    })
+    .catch(function(err) {
+      logger.error(err);
+    });
+});
 
 
 // Passport
@@ -123,8 +157,6 @@ passport.deserializeUser(function(user, done) {
   return done(null, user);
 });
 
-logger.info('Database and sessions initialized');
-
 // Views
 var viewsEnv = new nunjucks.Environment(
   new nunjucks.FileSystemLoader('views', { noCache: true, }),
@@ -141,6 +173,8 @@ viewsEnv.addFilter('urlfilter', function(str) {
   if(str.indexOf('javascript:') !== -1) {
     return '#filtered';
   }
+
+  return str;
 });
 viewsEnv.express(app);
 
@@ -179,7 +213,7 @@ process.on('SIGINT', function() {
   logger.info('Connection to Redis closed.');
 
   // TODO: check close method
-  app.locals.mongo.client.close()
+  app.locals.mongo.db.close()
     .then(function () {
       logger.info('Connection to MongoDB closed.');
       process.exit(0);
