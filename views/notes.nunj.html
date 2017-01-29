@@ -1,4 +1,5 @@
 {% extends './page.nunj.html' %}
+{% import './_macros.nunj.html' as macros %}
 
 {% block title %}{{ super() }} | Notes{% endblock %}
 
@@ -10,11 +11,53 @@
 <ol class="list list--posts">
   {% for note in notes %}
   <li>
+    <!-- Like -->
+    {% if note._postTypes[0] == 'like' %}
+    <article class="post post--compact tile-layout p-entry h-entry">
+      <div class="tile tile--2/3">
+        <span>{{ macros.replyActionText(note._targetProperty) }}</span>
+        {% for context in note._replyContext %}
+        <span class="p-{{ note._targetProperty }} h-cite">
+          <cite>{{ macros.contextSubject(context) }}</cite>
+        </span>
+        {% endfor %}
+      </div>
+      
+      <div class="post__permalink tile tile--1/3">
+        <a href="{{ note.url }}">
+          <time class="dt-published"
+                datetime="{{ note.published | date }}">{{ note.published | date('fromNow') }}</time>
+        </a><br /><small>{{ note.published | date }}</small>
+      </div>
+    </article>
+
+    <!-- Bookmark -->
+    {% elif note._postTypes[0] == 'bookmark' %}
+    <article class="post post--compact tile-layout p-entry h-entry">
+      <div class="tile tile--2/3">
+        <span>{{ macros.replyActionText(note._targetProperty) }}</span>
+        {% for context in note._replyContext %}
+        <span class="p-{{ note._targetProperty }} h-cite">
+          <cite>{{ macros.contextSubject(context) }}</cite>
+        </span>
+        {% endfor %}
+      </div>
+      
+      <div class="post__permalink tile tile--1/3">
+        <a href="{{ note.url }}">
+          <time class="dt-published"
+                datetime="{{ note.published | date }}">{{ note.published | date('fromNow') }}</time>
+        </a><br /><small>{{ note.published | date }}</small>
+      </div>
+    </article>
+    
+    {% else %}
     <article class="post p-entry h-entry">
       {% include './_partials/note-header.nunj.html' %}
       {% include './_partials/note-content.nunj.html' %}
       {% include './_partials/note-footer.nunj.html' %}
     </article>
+    {% endif %}
   </li>
   {% endfor %}
 </ol>

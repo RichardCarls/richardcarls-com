@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "css/",
+    "public_html/"
+  ]
+}

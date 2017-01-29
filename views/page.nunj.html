@@ -58,12 +58,12 @@
         <div class="tile-layout">
 
           <!-- Site Name -->
-          <div class="tile tile--40">
+          <div class="tile tile--2/5">
             <h1 class="site-name">{{ site.name }}</h1>
           </div>
 
           <!-- Site Navigation -->
-          <nav class="tile tile--60">
+          <nav class="tile tile--3/5">
             <ol class="site-nav">
               {% for page in site.pages %}
               <li><a {% if page.rel %}rel="{{ page.rel }}"{% endif %}

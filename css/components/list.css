@@ -1,0 +1,91 @@
+@charset "UTF-8";
+
+ul.list,
+ol.list {
+  margin-left: 0;
+  padding-left: 0;
+  list-style-type: none;
+}
+ul.list > li,
+ol.list > li {
+  position: relative;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  border-bottom: 1px dotted var(--color-lt-grey);
+}
+ul.list > li:last-child,
+ol.list > li:last-child {
+  border-bottom: none;
+}
+
+/* Definition Lists */
+dl.list {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+dl.list > dd {
+  margin-left: 0;
+}
+dl.list > dt {
+  margin-top: 1em;
+  font-weight: bold;
+}
+dl.list > dt:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+dl.list > dt + dd,
+dl.list > dd + dd,
+dl.list > dt + dt {
+  margin-top: 0;
+}
+
+/* Compact */
+dl.list.list--compact {
+  font-size: 0;
+}
+dl.list.list--compact > dt,
+dl.list.list--compact > dd {
+  display: inline;
+  font-size: var(--base-font-size);
+  font-size: 1rem;
+  vertical-align: top;
+}
+dl.list.list--compact > dt:after {
+  content: ": ";
+}
+dl.list.list--compact > dd + dt:before,
+dl.list.list--compact > dt + dt:before {
+  content: "\A";
+  white-space: pre-line;
+}
+dl.list.list--compact > dd:before {
+  content: ", ";
+}
+dl.list.list--compact > dt + dd:before {
+  content: "";
+}
+
+/* FAQ */
+dl.list.list--faq > dt:before {
+  content: "Q:";
+  position: absolute;
+  left: -1.5em;
+}
+dl.list.list--faq > dd {
+  position: relative;
+}
+dl.list.list--faq > dd:before {
+  content: "A:";
+  position: absolute;
+  left: -1.5em;
+}
+dl.list.list--faq > dd + dt {
+  border-top: 1px dotted var(--color-lt-grey);
+}
+dl.list.list--faq > dt + dt {
+  padding: 0;
+}
+dl.list.list--faq > dt:first-child {
+  border-top: none;
+}

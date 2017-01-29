@@ -1,25 +1,27 @@
 @charset "UTF-8";
 
 /* General */
-@import "normalize-css/normalize.css";
+@import "normalize.css";
 @import "global.css";
 @import "form.css";
 
 /* Tools */
-@import "tools/helpers.css";
 @import "tools/tile-layout.css";
 
 /* Components */
 @import "components/site-header.css";
 @import "components/post.css";
 @import "components/note-context.css";
-@import "components/metadata.css";
+@import "components/list.css";
 @import "components/inline-card.css";
 
 /**
  * Layout Blocks
  */
 .site-wrap {
+  margin: 0 auto;
+  max-width: 60em; /* 960px|16 */
+  max-width: 60rem;
   height: 100%;
   background-color: var(--color-white);
 }

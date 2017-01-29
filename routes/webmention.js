@@ -1,107 +1,118 @@
-var path = require('path');
-var logger = require(path.resolve(__dirname, '../lib/logger'));
-var _ = require('lodash');
-var Q = require('q');
+const winston = require('winston')
 
-var router = require('express').Router(); // eslint-disable-line new-cap
-var throwjs = require('throw.js');
+const router = require('express').Router()
+const throwjs = require('throw.js')
+const webmention = require('@rcarls/connect-webmention')
 
-var webmention = require('@rcarls/connect-webmention');
-var indieutil = require('@rcarls/indieutil');
-var app = require(path.resolve(__dirname, '../app'));
-var Note = require('../models/note');
-var NoteContext = require('../models/note-context');
-var Person = require('../models/person');
+const Note = require('../models/note')
+const NoteContext = require('../models/note-context')
+const Person = require('../models/person')
 
-router.post('/', webmention.receive({
+router.post('', webmention.receive({
   // TODO: implement these options in connect-webmention
   jf2: {
     preferredContentType: 'text/plain',
     implicitContentType: 'text/plain',
-    compact: false,
+    compact: false
   },
-  responseAs: 'cite',
-}), function(req, res) {
+  responseAs: 'cite'
+}), (req, res) => {
   if (req.webmention.error) {
-    logger.warn(req.webmention.error);
+    winston.warn(req.webmention.error)
     
-    return res.status(req.webmention.error.status || 500)
-      .send(req.webmention.error.message);
+    return res
+      .status(req.webmention.error.status || 500)
+      .send(req.webmention.error.message)
   }
 
-  var jf2 = req.webmention.data;
+  const jf2 = req.webmention.data
 
   // Set url if not parsed
-  jf2.url = jf2.url || req.webmention.source;
+  jf2.url = jf2.url || req.webmention.source
 
   // Set post types of source
   // TODO: Rename to responseTypes and store both type arrays
-  jf2._postTypes = req.webmention.postTypes;
-  jf2._responseTypes = req.webmention.responseTypes;
+  jf2._postTypes = req.webmention.postTypes
+  jf2._responseTypes = req.webmention.responseTypes
 
   // Set accessed
-  jf2.accessed = new Date();
+  jf2.accessed = new Date()
 
   // Remove implicit name
   if (req.webmention.postTypes.indexOf('article') === -1) {
-    delete jf2.name;
+    delete jf2.name
   }
 
-  var saveTasks = Object.keys(jf2.references).map(function(url) {
-    var ref = jf2.references[url];
+  // TODO: Same as micropub upsert Person
+  const saveTasks = Object.keys(jf2.references).map(url => {
+    const ref = jf2.references[url]
 
     // Ignore embedded cites (comments and such)
-
     if (ref.type === 'card') {
       // TODO: Set uid in toJf2 or fetch
-      ref.uid = ref.uid || ref.url[0];
-      
-      return new Person(ref).save()
-        .then(function(person) {
-          logger.info('Saved new person: ' + person.name);
-        });
+      if (!ref.uid) {
+        ref.uid = Array.isArray(ref.url) ? ref.url[0] : ref.url
+      }
+
+      Person
+        .findOne({ _id: ref.uid })
+        .exec()
+        .then(person => {
+          if (!person) {
+            return new Person(ref).save()
+          }
+
+          return person
+        })
+        .then(person => {
+          winston.info(`Saved new person ${person.uid}`)
+        })
     }
 
-    return null;
-  });
+    return null
+  })
 
-  delete jf2.references;
+  delete jf2.references
 
-  return Q.all([
+  return Promise.all([
     new NoteContext(jf2).save(),
-    Q.allSettled(saveTasks),
+    Promise.all(saveTasks)
   ])
-    .spread(function(response, refs) {
+    .then(([response, refs]) => {
       return Note
         .find()
         .byUrl(req.webmention.target)
-        .exec();
+        .exec()
     })
-    .then(function(note) {
+    .then(note => {
       if (!note) {
-        throw new throwjs.badRequest('Target could not be found.');
+        throw new throwjs.badRequest('Target could not be found.')
       }
 
-      note.comment.push(req.webmention.source);
+      note.comment.push(req.webmention.source)
       
-      return note.save();
+      return note.save()
     })
-    .then(function(note) {
+    .then(note => {
       if (!note) {
-        throw new throwjs.internalServerError('Problem updating target.');
+        throw new throwjs.internalServerError('Problem updating target.')
       }
 
-      logger.info('Saved new ' + jf2._postTypes[0]
-                  + ' response from ' + req.webmention.source);
+      winston.info(`Saved new ${jf2._postTypes[0]} response 
+from ${req.webmention.source}`)
       
-      return res.status(201).send();
+      return res
+        .status(201)
+        .send()
     })
-    .catch(function(err) {
+    .catch(err => {
       // TODO: Find rep. h-card if not enough author info (name + url)
-      logger.warn(err);
+      winston.warn(err)
       
-      return res.status(err.statusCode || 500).send();
-    });
-});
+      return res
+        .status(err.statusCode || 500)
+        .send()
+    })
+})
 
-module.exports = router;
+module.exports = router

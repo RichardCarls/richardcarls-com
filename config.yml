@@ -1,0 +1,40 @@
+site:
+  url: 'https://dev.richardcarls.com:3443'
+  name: 'Richard Carls Blog'
+  tagline: 'Full stack JavaScript developer'
+  
+  authorizationEndpoint: 'https://indieauth.com/auth'
+  tokenEndpoint: 'https://tokens.indieauth.com/token'
+  redirectUri: 'https://dev.richardcarls.com:3443/auth'
+  openidServer: 'https://indieauth.com/openid'
+  micropubEndpoint: 'https://dev.richardcarls.com:3443/micropub'
+  webmentionEndpoint: 'https://dev.richardcarls.com:3443/webmention'
+
+  pages:
+    - name: 'Home'
+      path: '/'
+    - name: 'Notes'
+      path: '/notes'
+    - name: 'Client'
+      path: '/client'
+
+profile:
+  type: card
+  name: Richard Carls
+  given-name: Richard
+  family-name: Carls
+  job-title: Web Developer
+  org:
+    name: Citi
+    url:
+      - 'https://citi.com'
+  locality: Cheektowaga
+  region: New York
+  country-name: US
+  url:
+    - 'https://dev.richardcarls.com:3443/'
+    - 'https://github.com/richardcarls'
+    - 'https://google.com/+RichardCarls'
+    - 'https://twitter.com/RichardCarls'
+  photo:
+    - 'https://placehold.it/120x120'

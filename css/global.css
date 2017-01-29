@@ -5,18 +5,17 @@
   --font-family-body: 'DejaVu Serif', 'Roboto Serif', 'Palatino', serif;
   --font-family-headings: 'Fira Sans', 'Roboto', 'Arial', sans-serif;
 
-  --color-black: #2e2e2e;
+  --color-black: #272727;
   --color-white: #ffffff;
-  --color-lt-grey: #e2e2e2;
-  --color-dk-grey: #d2d2d2;
+  --color-lt-grey: #a0a0a0;
+  --color-dk-grey: #9f9f9f;
+  --color-primary: #ef3b24;
 }
 
 html {
-  /* Use border-box for sanity */
-  box-sizing: border-box;
-
-  /* Fill viewport */
-  min-height: 100%;
+  min-height: 100%; /* Fill viewport */
+  box-sizing: border-box; /* Use border-box for sanity */
+  overflow-y: scroll; /* Always show scrollbar */
 }
 *,
 *:before,
@@ -40,6 +39,11 @@ h5,
 h6 {
   font-family: var(--font-family-headings);
   font-weight: normal;
+}
+
+a,
+a:link {
+  color: var(--color-primary);
 }
 
 p,

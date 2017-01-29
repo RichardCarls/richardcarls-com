@@ -1,46 +1,43 @@
-var _ = require('lodash');
-var mongoose = require('mongoose');
+const _ = require('lodash')
+const mongoose = require('mongoose')
 
-var personSchema = new mongoose.Schema({
-  _id: { type: String, },
-  
-  name: { type: String, required: true, },
-  photo: { type: [String], },
-  url: { type: [String], },
+const personSchema = new mongoose.Schema({
+  _id: { type: String },
+
+  name: { type: String, required: true },
+  photo: { type: [String] },
+  url: { type: [String] }
 }, {
   autoIndex: false,
-  toJSON: { getters: true, transform: toJf2, },
-  toObject: { getters: true, },
-});
+  toJSON: { getters: true, transform: toJf2 },
+  toObject: { getters: true }
+})
 
-personSchema.index({ _id: 1, name: 1, });
-
+personSchema.index({ _id: 1, name: 1 })
 
 /**
  * Gets the person's uid URL
- * 
+ *
  * @instance
  * @returns {String} - The person uid
  */
-personSchema.virtual('uid').get(function() {
-  return this._id;
-});
-
+personSchema.virtual('uid').get(function () {
+  return this._id
+})
 
 /**
  * Sets the person's uid URL
- * 
+ *
  * @instance
  * @param {String} value - The person uid
  */
-personSchema.virtual('uid').set(function(value) {
-  this._id = value;
-});
-
+personSchema.virtual('uid').set(function (value) {
+  this._id = value
+})
 
 /**
  * Format to JF2
- * 
+ *
  * @private
  * @param {Object} doc - The Mongo document
  * @param {Object} ret - The object being returned
@@ -49,27 +46,25 @@ personSchema.virtual('uid').set(function(value) {
  * properties prefixed with an underscore. Default is `true`.
  * @returns {Object} - The transformed return object
  */
-function toJf2(doc, ret, options) {
-  options = options || {};
-  options.keepUnderscored = (options.keepUnderscored !== false);
-  
-  for (var key in ret) {
-    var value = ret[key];
+function toJf2 (doc, ret, options = {}) {
+  options.keepUnderscored = (options.keepUnderscored !== false)
+
+  for (let key in ret) {
+    const value = ret[key]
 
     // Remove empty properties
     if (_.isEmpty(value)) {
-      delete ret[key];
+      delete ret[key]
     }
 
     if (!options.keepUnderscored && _.startsWith(key, '_')) {
-      delete ret[key];
+      delete ret[key]
     }
   }
 
   // Remove ids
-  delete ret._id;
-  delete ret.id;
+  delete ret._id
+  delete ret.id
 }
 
-
-module.exports = mongoose.model('Person', personSchema);
+module.exports = mongoose.model('Person', personSchema)

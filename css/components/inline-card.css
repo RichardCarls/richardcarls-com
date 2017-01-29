@@ -1,11 +1,12 @@
 @charset "UTF-8";
 
 .inline-card {
+  position: relative;
   display: inline-block;
 }
 .inline-card > img {
   width: auto;
-  height: 1em;
+  height: 1.25em;
 }
 .inline-card > .domain {
   font-size: 0.8em;

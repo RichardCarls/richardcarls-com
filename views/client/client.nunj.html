@@ -33,7 +33,7 @@
 </form>
 {% else %}
 <div class="tile-layout">
-  <div class="tile tile--60">
+  <div class="tile tile--3/5">
     {% if session.preferredEndpoint %}
     <!-- 3. Response Type Selection -->
     <h2>Response Type</h2>
@@ -123,7 +123,7 @@
     {% endif %}
   </div>
 
-  <div class="tile tile--40">
+  <div class="tile tile--2/5">
     <!-- 2. Endpoint Selection -->
     <h2>Micropub Endpoint</h2>
     <form method="post" action="/client/update/endpoint">

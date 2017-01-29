@@ -1,20 +1,17 @@
-var _ = require('lodash');
-var mongoose = require('mongoose');
-var moment = require('moment');
-var indieutil = require('@rcarls/indieutil');
-
+const _ = require('lodash')
+const mongoose = require('mongoose')
+const moment = require('moment')
 
 /**
  * @module Note
  */
 
-
 /**
  * Set of valid original post types
- * 
+ *
  * @private
  */
-var postTypes = [
+const postTypes = [
   'rsvp',
   'reply',
   'repost',
@@ -22,66 +19,64 @@ var postTypes = [
   'bookmark',
   'tag',
   'article',
-  'note',
-];
+  'note'
+]
 
 /**
  * Set of valid repsonse types for response contexts
- * 
+ *
  * @private
  */
-var responseTypes = [
+const responseTypes = [
   'rsvp',
   'reply',
   'repost',
   'like',
   'bookmark',
   'tag',
-  'mention',
-];
+  'mention'
+]
 
 /**
  * Mongoose schema for a NoteContext
- * 
+ *
  * @member {mongoose.Schema} schema
  */
-var noteContextSchema = new mongoose.Schema({
-  _id: { type: String, },
-  
-  name: { type: String, },
-  content: { type: String, },
+const noteContextSchema = new mongoose.Schema({
+  _id: { type: String },
+
+  name: { type: String },
+  content: { type: String },
   published: {
     type: Date,
     required: true,
-    validate: isValidDate,
-    get: getISO8601Date,
+    // TODO: validation
+    get: getISO8601Date
   },
   accessed: {
     type: Date,
     required: true,
-    validate: isValidDate,
-    get: getISO8601Date,
+    // TODO: validation
+    get: getISO8601Date
   },
 
-  author: { type: String, ref: 'Person', required: true, },
+  author: { type: String, ref: 'Person', required: true },
 
-  photo: { type: [String], },
+  photo: { type: [String] },
 
-  _postTypes: { type: [String], enum: postTypes, },
-  _responseTypes: { type: [String], enum: responseTypes, },
+  _postTypes: { type: [String], enum: postTypes },
+  _responseTypes: { type: [String], enum: responseTypes }
 }, {
   autoIndex: false,
-  toJSON: { getters: true, },
-  toObject: { getters: true, transform: toJf2, },
-});
+  toJSON: { getters: true },
+  toObject: { getters: true, transform: toJf2 }
+})
 
-noteContextSchema.index({ _id: 1, published: -1, });
-
-
+noteContextSchema.index({ _id: 1, published: -1 })
 
 /**
  * Format to JF2
- * 
+ *
  * @private
  * @param {Object} doc - The Mongo document
  * @param {Object} ret - The object being returned
@@ -90,104 +85,78 @@ noteContextSchema.index({ _id: 1, published: -1, });
  * properties prefixed with an underscore. Default is `true`.
  * @returns {Object} - The transformed return object
  */
-function toJf2(doc, ret, options) {
-  options = options || {};
-  options.keepUnderscored = (options.keepUnderscored !== false);
-  
-  for (var key in ret) {
-    var value = ret[key];
+function toJf2 (doc, ret, options = {}) {
+  options.keepUnderscored = (options.keepUnderscored !== false)
+
+  for (let key in ret) {
+    const value = ret[key]
 
     // Remove empty properties
     if (_.isEmpty(value)) {
-      delete ret[key];
+      delete ret[key]
     }
 
     if (!options.keepUnderscored && _.startsWith(key, '_')) {
-      delete ret[key];
+      delete ret[key]
     }
   }
 
   // Remove ids
-  delete ret._id;
-  delete ret.id;
+  delete ret._id
+  delete ret.id
 }
-
 
 /**
  * Gets the note context type
- * 
+ *
  * @instance
  * @returns {String} - The note type. Default is `'cite'`.
  */
-noteContextSchema.virtual('type').get(function() {
-  return 'cite';
-});
-
+noteContextSchema.virtual('type').get(() => 'cite')
 
 /**
  * Gets the note context URL
- * 
+ *
  * @instance
  * @returns {String} - The context URL
  */
-noteContextSchema.virtual('url').get(function() {
-  return this._id;
-});
-
+noteContextSchema.virtual('url').get(function () {
+  return this._id
+})
 
 /**
  * Sets the note context URL
- * 
+ *
  * @instance
  * @param {String} value - The context URL
  */
-noteContextSchema.virtual('url').set(function(value) {
+noteContextSchema.virtual('url').set(function (value) {
   if (Array.isArray(value)) {
-    this._id = value[0];
+    this._id = value[0]
   } else {
-    this._id = value;
+    this._id = value
   }
-});
-
+})
 
 /**
  * Gets the note context uid URL
- * 
+ *
  * @instance
  * @returns {String} - The context uid URL
  */
-noteContextSchema.virtual('uid').get(function() {
-  return this._id;
-});
-
-
-/**
- * Validation function for dates
- * 
- * @param {*} value - The value to test
- * @returns {Boolean} - `true` if parseable into a valid date
- */
-function isValidDate(value) {
-  return moment(value).isValid();
-}
-
-
-function isValidUrl(value) {
-  //return require('valid-url').isUri(value);
-  return true;
-};
-
+noteContextSchema.virtual('uid').get(function () {
+  return this._id
+})
 
 /**
  * Returns a date value as an ISO8601 datestring
- * 
+ *
  * @getter
  * @param {Number} value - The document date value
  * @returns {String} - The ISO8601 datestring
  */
-function getISO8601Date(value) {
-  return moment(value).toISOString();
+function getISO8601Date (value) {
+  return moment(value).toISOString()
 }
 
-
-module.exports = mongoose.model('NoteContext', noteContextSchema);
+module.exports = mongoose.model('NoteContext', noteContextSchema)

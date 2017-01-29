@@ -1,7 +1,7 @@
 {% import '../_macros.nunj.html' as macros %}
 
 <footer>
-  <dl class="metadata">
+  <dl class="list list--compact metadata">
     {% if note.category %}
     <dt>Category</dt>
     {% for category in note.category %}
@@ -9,7 +9,7 @@
     {% endfor %}
     {% endif %}
     <dt>Author</dt>
-    <dd class="inline-card p-author h-card">{{ macros.inlineCard(site.me) }}</dd>
+    <dd class="inline-card p-author h-card">{{ macros.inlineCard(profile) }}</dd>
     <dt>Published</dt>
     <dd><a href="{{ note.url }}"><time class="dt-published" datetime="{{ note.published | date }}">{{ note.published | date('fromNow') }}</time></a></dd>
     <dd><small>{{ note.published | date }}</small></dd>

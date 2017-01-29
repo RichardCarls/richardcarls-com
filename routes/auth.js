@@ -1,34 +1,35 @@
-var path = require('path');
-var logger = require(path.resolve(__dirname, '../lib/logger'));
-var router = require('express').Router(); // eslint-disable-line new-cap
-var bodyParser = require('body-parser');
-var passport = require('passport');
-var csurf = require('csurf');
+const path = require('path')
 
-var app = require(path.resolve(__dirname, '../app'));
+const router = require('express').Router()
+const bodyParser = require('body-parser')
+const passport = require('passport')
+const csurf = require('csurf')
 
-router.use(bodyParser.urlencoded({ extended: true, }));
-router.use(csurf());
+const app = require(path.resolve(process.env.APP_ROOT, './app'))
 
-router.all('/', passport.authenticate(['indieauth',], {
+// TODO: bundle bodyParser with IndieAuthStrategy
+router
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(csurf())
+
+router.all('/', passport.authenticate(['indieauth'], {
   successRedirect: '/#successauth',
-  failureRedirect: '/#failauth',
-}));
+  failureRedirect: '/#failauth'
+}))
 
-router.get('/login',
-           passport.authenticate(['indieauth', 'anonymous',]),
-           function(req, res) {
-             return res.render('login-page.nunj.html', {
-               site: app.locals.site,
-               user: req.user,
-               _csrf: req.csrfToken(),
-             });
-           });
+router.use(passport.authenticate(['indieauth', 'anonymous']))
+router.get('/login', (req, res) => {
+  return res.render('login-page.nunj.html', {
+    site: app.locals.site,
+    user: req.user,
+    _csrf: req.csrfToken()
+  })
+})
 
-router.get('/logout', function(req, res) {
-  req.session = null;
+router.get('/logout', (req, res) => {
+  req.session = null
 
-  return res.redirect('/#logout');
-});
+  return res.redirect('/#logout')
+})
 
-module.exports = router;
+module.exports = router

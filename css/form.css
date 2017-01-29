@@ -49,14 +49,3 @@ legend {
   padding: 0.25em 0;
   border-bottom: 1px solid var(--color-lt-grey);
 }
-
-/**
- * Inline form
- */
-form.inline input,
-form.inline select,
-form.inline label,
-form.inline textarea {
-  display: inline-block;
-  margin: 0;
-}

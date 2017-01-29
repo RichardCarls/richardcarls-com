@@ -1,5 +1,4 @@
 {% extends './page.nunj.html' %}
-{% set me = site.me %}
 
 {% block title %}{{ super() }} | Home{% endblock %}
 
@@ -7,17 +6,16 @@
 <!-- Intro / Representative h-card -->
 <article class="h-card">
   <img class="u-photo"
-       src="{{ me.photo }}"
-       alt="Profile photo of {{ me.name }}" />
+       src="{{ profile.photo }}"
+       alt="Profile photo of {{ profile.name }}" />
 
-  <!-- TODO: Load configured h-card template -->
   <h1>About Rick</h1>
-  <p><span class="p-name"><span class="p-given-name">{{ me['given-name'] }}</span> <span class="p-family-name">{{ me['family-name'] }}</span></span> is a <span class="p-job-title">{{ me['job-title'] }}</span> at <a class="u-org" href="{{ me.org.url }}">{{ me.org.name }}</a>, living in <span class="p-locality">{{ me.locality }}</span>, <span class="p-region">{{ me.region }}</span>, <span class="p-country-name">{{ me['country-name'] }}</span>.</p>
+  <p><span class="p-name"><span class="p-given-name">{{ profile['given-name'] }}</span> <span class="p-family-name">{{ profile['family-name'] }}</span></span> is a <span class="p-job-title">{{ profile['job-title'] }}</span> at <a class="u-org" href="{{ profile.org.url }}">{{ profile.org.name }}</a>, living in <span class="p-locality">{{ profile.locality }}</span>, <span class="p-region">{{ profile.region }}</span>, <span class="p-country-name">{{ profile['country-name'] }}</span>.</p>
 
   <section>
     <h2>Around the Web</h2>
-    <ul>
-      {% for url in me.url %}
+    <ul class="list list--separators">
+      {% for url in profile.url %}
       <li>
         <a rel="me" class="u-url {{ 'u-uid' if loop.first }}"
            href="{{ url }}">{{ url }}</a>

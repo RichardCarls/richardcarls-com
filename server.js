@@ -1,50 +1,75 @@
-var fs = require('fs');
-var http = require('http');
-var https = require('https');
+const path = require('path')
+const fs = require('fs')
+const http = require('http')
+const https = require('https')
 
-var logger = require(__dirname + '/lib/logger.js');
-var app = require(__dirname + '/app.js');
+const winston = require('winston')
+winston.configure({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  transports: [
+    new winston.transports.Console({
+      colorize: true,
+      prettyPrint: true,
+      depth: 5
+    })
+  ]
+})
 
-// HTTP Redirect
-if (!process.env.PORT) {
-  logger.error('Missing "PORT" environment variable');
+const isDev = process.env.NODE_ENV === 'development'
+
+winston.info(`Starting ${isDev ? 'development' : 'production'} server`)
+
+const app = require('./app')
+
+const port = process.env.PORT || isDev ? 3000 : 80
+const securePort = process.env.SECURE_PORT || isDev ? 3443 : 443
+const certsPath = process.env.CERTS_DIR || __dirname
+
+const paths = {
+  key: path.resolve(certsPath, 'privkey.pem'),
+  cert: path.resolve(certsPath, 'cert.pem'),
+  ca: path.resolve(certsPath, 'chain.pem')
 }
-var insecureServer = http.createServer(function(req, res) {
-  res.writeHead(301, {
-    'Content-Type':  'text/plain',
-    'Location':      'https://' + req.headers.host + req.url,
-  });
-  res.end('Redirecting to SSL\n');
-}).listen(process.env.PORT, function(err) {
-  if (err) {
-    logger.error(err);
-    process.exit(0);
+
+let httpsConfig
+
+try {
+  httpsConfig = {
+    key: fs.readFileSync(paths.key),
+    cert: fs.readFileSync(paths.cert),
+    ca: fs.readFileSync(paths.ca)
   }
-});
-
-// HTTPS Server
-if (!process.env.SECURE_PORT || !process.env.CERTS_DIR) {
-  logger.error('Missing "SECURE_PORT" or "CERTS_DIR" environment variables');
-  process.exit(0);
+} catch (e) {
+  // TODO: allow only http server
+  winston.error('Could not read one or more key file paths', e)
+  process.exit(0)
 }
 
-var secureOptions = {
-  key: fs.readFileSync(process.env.CERTS_DIR + '/privkey.pem'),
-  cert: fs.readFileSync(process.env.CERTS_DIR + '/cert.pem'),
-  ca: fs.readFileSync(process.env.CERTS_DIR + '/chain.pem'),
-};
+const secureServer = https.createServer(httpsConfig, app)
+secureServer.listen(securePort, err => {
+  if (err) {
+    winston.error(err)
+    process.exit(0)
+  }
 
-if (!secureOptions.key || !secureOptions.cert || !secureOptions.ca) {
-  logger.error('Missing SSL credentials');
-  process.exit(0);
-}
+  winston.info(`Listening on secure port ${securePort}`)
+})
 
-var secureServer = https.createServer(secureOptions, app)
-  .listen(process.env.SECURE_PORT, function(err) {
-    if (err) {
-      logger.error(err);
-      process.exit(0);
-    }
+const insecureServer = http.createServer((req, res) => {
+  // TODO: Security concerns redirecting to https?
+  res.writeHead(301, {
+    'Content-Type': 'text/plain',
+    Location: `https://${req.headers.host + req.url}`
+  })
 
-    logger.info('Listening on https port ' + process.env.SECURE_PORT);
-  });
+  res.end('Redirecting to SSL\n')
+})
+
+insecureServer.listen(port, err => {
+  if (err) {
+    winston.error(err)
+    process.exit(0)
+  }
+
+  winston.info(`Listening on port ${port}`)
+})

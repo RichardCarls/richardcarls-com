@@ -1,50 +1,48 @@
-var path = require('path');
-var router = require('express').Router(); // eslint-disable-line new-cap
+const path = require('path')
 
-var Note = require(path.resolve(__dirname, '../models/note'));
-var app = require(path.resolve(__dirname, '../app'));
-var logger = require(path.resolve(__dirname, '../lib/logger.js'));
+const winston = require('winston')
+const router = require('express').Router()
 
-router.get('/', function(req, res) {
+const Note = require(path.resolve(process.env.APP_ROOT, './models/note'))
+const app = require(path.resolve(process.env.APP_ROOT, './app'))
+
+router.get('/', (req, res) => {
   Note.find({})
     .populateReplyContexts()
-    .sort({ published: -1, })
+    .sort({ published: -1 })
     .exec()
-    .then(function(notes) {
-      return res.render('notes.nunj.html', {
-        site: app.locals.site,
-        user: req.user,
-        notes: notes.map(function(note) { return note.toObject(); }),
-      });
-    })
-    .catch(function(err) {
-      logger.error(err);
-    });
-});
+    .then(notes => res.render('notes.nunj.html', {
+      site: app.locals.site,
+      profile: app.locals.profile,
+      user: req.user,
+      notes: notes.map(note => note.toObject())
+    }))
+    .catch(err => winston.error(err))
+})
 
-router.get('/:slug', function(req, res) {
-  Note.findOne({ slug: req.params.slug, })
+router.get('/:slug', (req, res) => {
+  Note.findOne({ slug: req.params.slug })
     .populateReplyContexts()
     .populateComments({
-      sort: { published: -1, },
-      // limit, start
+      sort: { published: -1 }
+      // TODO: limit, from, to
     })
     .exec()
-    .then(function(note) {
-      logger.debug('note', note.toObject());
-      
+    .then(note => {
       return res.render('note-page.nunj.html', {
         site: app.locals.site,
+        profile: app.locals.profile,
         user: req.user,
-        note: note.toObject(),
-      });
+        note: note.toObject()
+      })
     })
-    .catch(function(err) {
-      logger.error(err);
+    .catch(err => {
+      winston.error(err)
       
-      return res.status(404).send();
-    });
+      return res
+        .status(404)
+        .send()
+    })
+})
 
-});
-
-module.exports = router;
+module.exports = router

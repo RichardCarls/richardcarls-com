@@ -1,142 +1,138 @@
-var path = require('path');
-var logger = require(path.resolve(__dirname, '../lib/logger'));
-var Q = require('q');
-var router = require('express').Router(); // eslint-disable-line new-cap
-var bodyParser = require('body-parser');
-var csurf = require('csurf');
-var request = require('request');
-var _ = require('lodash');
+const path = require('path')
+const qs = require('querystring')
 
-var indieutil = require('@rcarls/indieutil');
-var micropub = require('connect-micropub');
-var Note = require(path.resolve(__dirname, '../models/note'));
+const winston = require('winston')
+const axios = require('axios').create()
+const router = require('express').Router() // eslint-disable-line new-cap
+const bodyParser = require('body-parser')
+const csurf = require('csurf')
+const _ = require('lodash')
 
-var app = require(path.resolve(__dirname, '../app'));
+const app = require(path.resolve(process.env.APP_ROOT, './app'))
 
-router.use(bodyParser.urlencoded({ extended: true, }));
-router.use(csurf());
+router
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(csurf())
 
-var client = {
+const client = {
   responseTypes: [
     // RSVP
-    { name: 'Reply', value: 'in-reply-to', },
-    { name: 'Repost', value: 'repost-of', },
-    { name: 'Like', value: 'like-of', },
-    { name: 'Bookmark', value: 'bookmark-of', },
-    { name: 'Tag', value: 'tag-of', },
-  ],
-};
+    { name: 'Reply', value: 'in-reply-to' },
+    { name: 'Repost', value: 'repost-of' },
+    { name: 'Like', value: 'like-of' },
+    { name: 'Bookmark', value: 'bookmark-of' },
+    { name: 'Tag', value: 'tag-of' }
+  ]
+}
 
-router.get('/', function(req, res) {
-  client.responseTypes.forEach(function(type) {
+router.get('/', (req, res) => {
+  client.responseTypes.forEach(type => {
     if (req.query[type.value]) {
-      client.currentResponseType = type.value;
+      client.currentResponseType = type.value
     }
-  });
-  
+  })
+
   return res.render('client/client.nunj.html', {
     site: app.locals.site,
+    profile: app.locals.profile,
     user: req.user,
     client: _.assign(client, req.query),
     session: req.session,
-    _csrf: req.csrfToken(),
-  });
-});
+    _csrf: req.csrfToken()
+  })
+})
 
-router.post('/update/:property', function(req, res) {
-  if (!req.user) { return res.redirect(req.baseUrl); }
-  
-  switch(req.params.property) {
-  case 'endpoint':
-    var config;
-    var endpoint;
-
-    if (req.body.endpoint === 'other') {
-      endpoint = req.body['endpoint-other'];
-    } else {
-      endpoint = req.body.endpoint;
-    }
-    
-    // Update the user's preferred endpoint and fetch config
-    if (req.session.preferredEndpoint !== endpoint) {
-      req.session.preferredEndpoint = endpoint;
-
-      request.get(endpoint, {
-        auth: {
-          bearer: req.user.token,
-        },
-        qs: { q: 'config', }
-      }, function(err, response, body) {
-        if (!err) {
-          try {
-            config = JSON.parse(body);
-          } catch(err) {
-            config = {};
-          }
-        }
-
-        req.session.config = config;
-
-        return res.redirect(req.baseUrl);
-      });
-    }
-    break;
-  case 'responseType':
-    var type = req.body.responseType;
-    var targets = req.body[type];
-
-    return res.redirect(req.baseUrl + '?' + type + '[]');
-    break;
+router.post('/update/:property', (req, res) => {
+  if (!req.user) {
+    return res.redirect(req.baseUrl)
   }
-});
 
-router.post('/post', function(req, res, next) {
+  switch (req.params.property) {
+    case 'endpoint':
+      let config
+      let endpoint
+
+      if (req.body.endpoint === 'other') {
+        endpoint = req.body['endpoint-other']
+      } else {
+        endpoint = req.body.endpoint
+      }
+
+      // Update the user's preferred endpoint and fetch config
+      if (req.session.preferredEndpoint !== endpoint) {
+        req.session.preferredEndpoint = endpoint
+
+        axios.get(endpoint, {
+          params: {
+            q: 'config'
+          }
+        })
+          .then(response => {
+            try {
+              config = JSON.parse(response.data)
+            } catch (err) {
+              config = {}
+            }
+
+            req.session.config = config
+
+            return res.redirect(req.baseUrl)
+          })
+          .catch(err => winston.error(err))
+      }
+      break
+
+    case 'responseType':
+      const type = req.body.responseType
+
+      return res.redirect(`${req.baseUrl}?${type}[]`)
+  }
+})
+
+router.post('/post', (req, res) => {
   // Format categories
   req.body.category = req.body.category
-    .split(/[\s,]+/);
-  
-  delete req.body._csrf;
-  
+    .split(/[\s,]+/)
+
+  delete req.body._csrf
+
   // Post to user's micropub endpoint
-  request.post(req.session.preferredEndpoint, {
-    auth: {
-      bearer: req.user.token,
-    },
-    form: req.body,
-  }, function(err, response, body) {
-    if (err) {
-      logger.error(err);
-      return next(err);
-    }
+  axios
+    .post(req.session.preferredEndpoint, qs.stringify(req.body), {
+      headers: {
+        Authorization: `Bearer ${req.user.token}`
+      }
+    })
+    .then(response => {
+      return res.redirect(response.headers.location)
+    })
+    .catch(err => {
+      winston.error(err)
 
-    if (response.statusCode !== 201) {
-      return res.redirect(req.baseUrl + '#failed');
-    }
-    
-    return res.redirect(response.headers.location);
-  });
-});
+      return res.redirect(req.baseUrl + '#failed')
+    })
+})
 
-router.get('/preview', function(req, res) {
-  return res.end('Preview not loaded');
-});
+router.get('/preview', (req, res) => {
+  return res.end('Preview not loaded')
+})
 
-router.post('/preview', function(req, res) {
+router.post('/preview', (req, res) => {
   // Format categories
   req.body.category = req.body.category
-    .split(/[\s,]+/);
-  
-  delete req.body._csrf;
-  
-  // Post to user's micropub endpoint
-  request.post(req.session.config.preview, {
-    auth: {
-      bearer: req.user.token,
-    },
-    form: req.body,
-  }, function(err, response, body) {
-    return res.status(200).end(body);
-  });
-});
+    .split(/[\s,]+/)
 
-module.exports = router;
+  delete req.body._csrf
+
+  // Post to user's micropub endpoint
+  axios.post(req.session.config.preview, {
+    headers: {
+      Authorization: `Bearer ${req.user.token}`
+    },
+    data: req.body
+  })
+    .then(({ data }) => res.status(200).end(data))
+    .catch(err => winston.error(err))
+})
+
+module.exports = router

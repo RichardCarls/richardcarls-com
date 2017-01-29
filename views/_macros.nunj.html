@@ -1,11 +1,16 @@
 <!-- Inline h-card -->
 {% macro inlineCard(person) %}
 {% if person.photo %}
-<img class="u-photo" src="{{ person.photo }}"
-     alt="Profile photo of {{ person.name }}" />
+<img class="u-photo"
+     src="{{ person.photo }}"
+     alt="Photo of {{ person.name }}" />
 {% endif %}
-<a class="u-uid u-url" href="{{ person.uid or person.url[0] | urlfilter }}"><span class="p-name">{{ person.name }}</span></a>
-<span class="domain">{{ person.uid or person.url[0] }}</span>
+<a class="u-uid u-url"
+   href="{{ person.uid or person.url[0] | urlfilter }}"
+   target="_blank"
+   title="Homepage of {{ person.name }}">
+  <span class="p-name">{{ person.name }}</span>
+</a>
 {% endmacro %}
 
 <!-- Action text for reply context -->
