@@ -1,4 +1,4 @@
-FROM node:4.4
+FROM node:6.9
 
 RUN npm install nodemon -g
 RUN npm install
